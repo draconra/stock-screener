@@ -341,6 +341,38 @@ body {
     animation: spin 1s linear infinite;
 }
 
+/* Price range rows on stock cards */
+.price-range-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 500;
+}
+
+.price-range-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-right: 4px;
+    opacity: 0.8;
+}
+
+.price-range-buy {
+    background: rgba(38, 166, 154, 0.12);
+    color: #26a69a;
+    border: 1px solid rgba(38, 166, 154, 0.25);
+}
+
+.price-range-sell {
+    background: rgba(239, 83, 80, 0.1);
+    color: #ef9a9a;
+    border: 1px solid rgba(239, 83, 80, 0.2);
+}
+
 /* Watch signal badge */
 .signal-watch {
     background: #1c2128;

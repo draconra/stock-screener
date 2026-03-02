@@ -8,6 +8,10 @@ export interface Stock {
     RSI: number;
     signal: string;
     sector: string;
+    buy_low: number;
+    buy_high: number;
+    sell_low: number;
+    sell_high: number;
 }
 
 export interface GroupedStocks {

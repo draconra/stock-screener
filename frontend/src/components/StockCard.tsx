@@ -2,6 +2,9 @@ import React, { type MouseEvent } from 'react';
 import { Star, X } from 'lucide-react';
 import { Stock } from '../types';
 
+const fmt = (p: number) =>
+    p > 0 ? p.toLocaleString('id-ID') : '—';
+
 interface StockCardProps {
     stock: Stock;
     selected: boolean;
@@ -46,6 +49,20 @@ const StockCard: React.FC<StockCardProps> = ({
             </span>
             <span style={{ color: '#8b949e', fontSize: '0.75rem' }}>RSI: {Math.round(stock.RSI || 0)}</span>
         </div>
+
+        {/* Price ranges */}
+        {stock.buy_low > 0 && (
+            <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                <div className="price-range-row price-range-buy">
+                    <span className="price-range-label">Buy</span>
+                    <span>{fmt(stock.buy_low)} – {fmt(stock.buy_high)}</span>
+                </div>
+                <div className="price-range-row price-range-sell">
+                    <span className="price-range-label">Target</span>
+                    <span>{fmt(stock.sell_low)} – {fmt(stock.sell_high)}</span>
+                </div>
+            </div>
+        )}
     </div>
 );
 
