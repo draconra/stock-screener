@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { createChart, CandlestickSeries, createSeriesMarkers } from 'lightweight-charts';
+import { API_BASE } from '../config';
 
 interface TVChartProps {
     symbol: string;
@@ -66,7 +67,7 @@ const TVChart: React.FC<TVChartProps> = ({ symbol }) => {
             const { chart, candleSeries } = chartRef.current;
 
             try {
-                const response = await fetch(`http://localhost:8000/api/history/${symbol}`);
+                const response = await fetch(`${API_BASE}/api/history/${symbol}`);
                 const result = await response.json();
 
                 if (result.status === 'success' && result.data?.length) {

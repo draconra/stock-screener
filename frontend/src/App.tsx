@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BarChart2, RefreshCw, Star, Search, X } from 'lucide-react';
+import { BarChart2, RefreshCw, Star, Search, X, Newspaper } from 'lucide-react';
 import TVChart from './components/TVChart';
 import ForecastCard from './components/ForecastCard';
+import NewsTab from './components/NewsTab';
+import { API_BASE } from './config';
 
 interface Stock {
     ticker: string;
@@ -19,7 +21,7 @@ interface GroupedStocks {
     [key: string]: Stock[];
 }
 
-type TabType = 'screener' | 'favorites';
+type TabType = 'screener' | 'favorites' | 'news';
 
 function App() {
     const [groupedStocks, setGroupedStocks] = useState<GroupedStocks>({});
@@ -74,7 +76,7 @@ function App() {
     const fetchStocks = async () => {
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8000/api/candidates');
+            const response = await fetch(`${API_BASE}/api/candidates`);
             const result = await response.json();
             if (result.status === 'success') {
                 setGroupedStocks(result.data);
@@ -103,7 +105,7 @@ function App() {
         searchTimeout.current = setTimeout(async () => {
             setSearchLoading(true);
             try {
-                const res = await fetch(`http://localhost:8000/api/search?q=${encodeURIComponent(searchQuery)}`);
+                const res = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(searchQuery)}`);
                 const result = await res.json();
                 if (result.status === 'success') setSearchResults(result.data);
             } catch (err) {
@@ -168,6 +170,10 @@ function App() {
                         <Star size={14} fill={activeTab === 'favorites' ? '#f0b429' : 'none'} color={activeTab === 'favorites' ? '#f0b429' : '#8b949e'} />
                         Favorites ({favorites.length})
                     </button>
+                    <button className={`tab-btn ${activeTab === 'news' ? 'tab-active' : ''}`} onClick={() => setActiveTab('news')}>
+                        <Newspaper size={14} />
+                        News
+                    </button>
                 </div>
                 <button onClick={fetchStocks} disabled={loading} style={{ background: '#21262d', border: '1px solid #30363d', color: 'white', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
@@ -191,6 +197,9 @@ function App() {
                             )}
                         </>
                     )}
+
+                    {/* ── NEWS TAB ── */}
+                    {activeTab === 'news' && <NewsTab />}
 
                     {/* ── FAVORITES TAB ── */}
                     {activeTab === 'favorites' && (

@@ -2,10 +2,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from screener_service import get_scalp_candidates
 from tradingview_screener import Query
-from typing import Optional
+from typing import Optional, Any
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 import yfinance as yf
 import pandas as pd
 import numpy as np
+import feedparser
+import asyncio
+import time
 
 
 app = FastAPI()
@@ -17,6 +22,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ─── In-memory TTL cache ─────────────────────────────────────────
+_cache: dict[str, tuple[float, Any]] = {}
+
+def _cache_get(key: str, ttl: int) -> Any:
+    entry = _cache.get(key)
+    if entry and time.time() - entry[0] < ttl:
+        return entry[1]
+    return None
+
+def _cache_set(key: str, val: Any) -> None:
+    _cache[key] = (time.time(), val)
+
 
 def format_ticker(symbol: str) -> str:
     return symbol.split(':')[-1] + ".JK"
@@ -209,12 +227,56 @@ def make_forecast(row) -> dict:
     }
 
 
+# ─── News helpers ───────────────────────────────────────────────
+
+NEWS_FEEDS = [
+    {"url": "https://news.google.com/rss/search?q=IHSG+saham+indonesia+bursa&hl=id&gl=ID&ceid=ID:id", "category": "IHSG"},
+    {"url": "https://news.google.com/rss/search?q=bursa+efek+indonesia+investasi+emiten&hl=id&gl=ID&ceid=ID:id", "category": "IDX"},
+    {"url": "https://news.google.com/rss/search?q=indonesia+stock+market+IDX+IHSG+economy&hl=en-US&gl=US&ceid=US:en", "category": "Global"},
+    {"url": "https://news.google.com/rss/search?q=coal+palm+oil+nickel+indonesia+commodity&hl=en-US&gl=US&ceid=US:en", "category": "Commodity"},
+]
+
+_BEARISH_KW = [
+    "drop", "fall", "crash", "decline", "weak", "fear", "warning", "risk", "slump",
+    "ambruk", "jeblok", "turun", "jatuh", "perang", "anjlok", "melemah", "koreksi",
+    "jual", "rugi", "tersungkur", "tertekan", "terpuruk",
+]
+_BULLISH_KW = [
+    "rise", "gain", "rally", "growth", "strong", "bullish", "surge", "recover", "rebound",
+    "naik", "optimis", "menguat", "tumbuh", "positif", "beli", "kuat", "reli",
+]
+
+
+def _get_sentiment(title: str) -> str:
+    t = title.lower()
+    bull = sum(1 for w in _BULLISH_KW if w in t)
+    bear = sum(1 for w in _BEARISH_KW if w in t)
+    if bear > bull:
+        return "bearish"
+    if bull > bear:
+        return "bullish"
+    return "neutral"
+
+
+def _time_ago(dt: datetime) -> str:
+    diff = int((datetime.now(timezone.utc) - dt).total_seconds())
+    if diff < 3600:
+        return f"{max(diff // 60, 1)}m ago"
+    if diff < 86400:
+        return f"{diff // 3600}h ago"
+    return f"{diff // 86400}d ago"
+
+
 # ─── Endpoints ──────────────────────────────────────────────────
 
 @app.get("/api/candidates")
 async def candidates():
+    cached = _cache_get("candidates", 300)  # 5 min
+    if cached is not None:
+        return {"status": "success", "data": cached}
     try:
-        data = get_scalp_candidates()
+        data = await asyncio.to_thread(get_scalp_candidates)
+        _cache_set("candidates", data)
         return {"status": "success", "data": data}
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -224,20 +286,29 @@ async def candidates():
 async def search(q: str = ""):
     if not q or len(q) < 2:
         return {"status": "success", "data": []}
+    cache_key = f"search:{q.upper()}"
+    cached = _cache_get(cache_key, 120)  # 2 min
+    if cached is not None:
+        return {"status": "success", "data": cached}
     try:
-        query = (Query()
-            .set_markets('indonesia')
-            .select('name', 'close', 'change', 'volume', 'relative_volume_10d_calc', 'RSI', 'sector')
-            .limit(100))
-        _, df = query.get_scanner_data()
-        q_upper = q.upper()
-        mask = (
-            df['name'].str.upper().str.contains(q_upper, na=False) |
-            df['ticker'].str.upper().str.contains(q_upper, na=False)
-        )
-        matched = df[mask].head(10).copy()
-        matched['signal'] = 'WATCH'
-        return {"status": "success", "data": matched.to_dict(orient='records')}
+        def _search():
+            query = (Query()
+                .set_markets('indonesia')
+                .select('name', 'close', 'change', 'volume', 'relative_volume_10d_calc', 'RSI', 'sector')
+                .limit(100))
+            _, df = query.get_scanner_data()
+            q_upper = q.upper()
+            mask = (
+                df['name'].str.upper().str.contains(q_upper, na=False) |
+                df['ticker'].str.upper().str.contains(q_upper, na=False)
+            )
+            matched = df[mask].head(10).copy()
+            matched['signal'] = 'WATCH'
+            return matched.to_dict(orient='records')
+
+        data = await asyncio.to_thread(_search)
+        _cache_set(cache_key, data)
+        return {"status": "success", "data": data}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -245,31 +316,35 @@ async def search(q: str = ""):
 @app.get("/api/history/{symbol}")
 async def history(symbol: str):
     """Daily OHLC + buy/sell markers using research-backed signal logic."""
+    cache_key = f"history:{symbol}"
+    cached = _cache_get(cache_key, 1800)  # 30 min
+    if cached is not None:
+        return cached
     try:
-        ticker_symbol = format_ticker(symbol)
-        ticker = yf.Ticker(ticker_symbol)
-        df = ticker.history(period="1y", interval="1d")
+        def _fetch():
+            ticker_symbol = format_ticker(symbol)
+            df = yf.Ticker(ticker_symbol).history(period="1y", interval="1d")
+            if df.empty:
+                return None
+            df = compute_indicators(df).dropna().reset_index()
+            df['time'] = df['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
+            markers = []
+            for _, row in df.iterrows():
+                m = classify_candle(row)
+                if m:
+                    markers.append({'time': row['time'], **m})
+            chart_data = df[['time', 'Open', 'High', 'Low', 'Close']].rename(
+                columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close'}
+            ).to_dict(orient='records')
+            return {"status": "success", "data": chart_data, "markers": markers}
 
-        if df.empty:
+        result = await asyncio.to_thread(_fetch)
+        if result is None:
             raise HTTPException(status_code=404, detail="No data found")
-
-        df = compute_indicators(df)
-        df = df.dropna()
-        df = df.reset_index()
-        df['time'] = df['Date'].apply(lambda x: x.strftime('%Y-%m-%d'))
-
-        markers = []
-        for _, row in df.iterrows():
-            m = classify_candle(row)
-            if m:
-                markers.append({'time': row['time'], **m})
-
-        chart_data = df[['time', 'Open', 'High', 'Low', 'Close']].rename(columns={
-            'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close'
-        }).to_dict(orient='records')
-
-        return {"status": "success", "data": chart_data, "markers": markers}
-
+        _cache_set(cache_key, result)
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -277,30 +352,80 @@ async def history(symbol: str):
 @app.get("/api/forecast/{symbol}")
 async def forecast(symbol: str):
     """Tomorrow's direction forecast based on today's indicators."""
+    cache_key = f"forecast:{symbol}"
+    cached = _cache_get(cache_key, 1800)  # 30 min
+    if cached is not None:
+        return cached
     try:
-        ticker_symbol = format_ticker(symbol)
-        ticker = yf.Ticker(ticker_symbol)
-        df = ticker.history(period="6mo", interval="1d")
+        def _fetch():
+            ticker_symbol = format_ticker(symbol)
+            df = yf.Ticker(ticker_symbol).history(period="6mo", interval="1d")
+            if df.empty:
+                return None
+            df = compute_indicators(df).dropna()
+            last = df.iloc[-1]
+            result = make_forecast(last)
+            result['last_close'] = round(float(last['Close']), 2)
+            result['last_date']  = str(df.index[-1].date())
+            result['symbol']     = symbol
+            result['atr']        = round(float(last['ATR']), 2)
+            return {"status": "success", "data": result}
 
-        if df.empty:
+        result = await asyncio.to_thread(_fetch)
+        if result is None:
             raise HTTPException(status_code=404, detail="No data found")
-
-        df = compute_indicators(df)
-        df = df.dropna()
-
-        last = df.iloc[-1]
-        result = make_forecast(last)
-
-        # Add price context
-        result['last_close'] = round(float(last['Close']), 2)
-        result['last_date']  = str(df.index[-1].date())
-        result['symbol']     = symbol
-        result['atr']        = round(float(last['ATR']), 2)
-
-        return {"status": "success", "data": result}
-
+        _cache_set(cache_key, result)
+        return result
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/news")
+async def news():
+    cached = _cache_get("news", 600)  # 10 min
+    if cached is not None:
+        return cached
+
+    def _fetch_news():
+        items = []
+        seen: set = set()
+        for feed_cfg in NEWS_FEEDS:
+            try:
+                d = feedparser.parse(feed_cfg["url"])
+                for entry in d.entries[:30]:
+                    title = entry.get("title", "").strip()
+                    url = entry.get("link", "")
+                    if not title or title in seen:
+                        continue
+                    seen.add(title)
+                    try:
+                        pub = parsedate_to_datetime(entry.get("published", ""))
+                        published_at = pub.isoformat()
+                        published_label = _time_ago(pub)
+                    except Exception:
+                        published_at = ""
+                        published_label = ""
+                    src = entry.get("source", {})
+                    source = src.get("title", "") if isinstance(src, dict) else str(src)
+                    items.append({
+                        "title": title,
+                        "url": url,
+                        "source": source,
+                        "published_at": published_at,
+                        "published_label": published_label,
+                        "category": feed_cfg["category"],
+                        "sentiment": _get_sentiment(title),
+                    })
+            except Exception:
+                continue
+        items.sort(key=lambda x: x.get("published_at", ""), reverse=True)
+        return {"status": "success", "data": items[:80]}
+
+    result = await asyncio.to_thread(_fetch_news)
+    _cache_set("news", result)
+    return result
 
 
 if __name__ == "__main__":

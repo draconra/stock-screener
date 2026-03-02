@@ -331,6 +331,16 @@ body {
     color: #f0b429;
 }
 
+/* Spin animation for refresh button */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
 /* Watch signal badge */
 .signal-watch {
     background: #1c2128;

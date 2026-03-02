@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react';
+import { API_BASE } from '../config';
 
 interface Factor {
     label: string;
@@ -63,7 +64,7 @@ const ForecastCard: React.FC<ForecastCardProps> = ({ symbol }) => {
             setError('');
             setForecast(null);
             try {
-                const res = await fetch(`http://localhost:8000/api/forecast/${symbol}`);
+                const res = await fetch(`${API_BASE}/api/forecast/${symbol}`);
                 const result = await res.json();
                 if (result.status === 'success') {
                     setForecast(result.data);
