@@ -379,3 +379,136 @@ body {
     color: #8b949e;
     border: 1px solid #30363d;
 }
+
+/* ─── Glossary ──────────────────────────────────────────────── */
+.glossary-container {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.glossary-header {
+    margin-bottom: 1rem;
+}
+
+.glossary-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+}
+
+.glossary-search:focus-within {
+    border-color: #1f6feb;
+}
+
+.glossary-search-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: white;
+    font-size: 0.95rem;
+}
+
+.glossary-search-input::placeholder {
+    color: #8b949e;
+}
+
+.glossary-categories {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.glossary-cat-btn {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    padding: 5px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.2s;
+}
+
+.glossary-cat-btn:hover {
+    color: white;
+    border-color: #8b949e;
+}
+
+.glossary-cat-active {
+    background: #1f6feb !important;
+    border-color: #1f6feb !important;
+    color: white !important;
+}
+
+.glossary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.glossary-item {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.glossary-item:hover {
+    border-color: #1f6feb;
+}
+
+.glossary-item-open {
+    border-color: #1f6feb;
+    background: #1c2128;
+}
+
+.glossary-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.glossary-term {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #e6edf3;
+}
+
+.glossary-cat-tag {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    background: #21262d;
+    color: #8b949e;
+    border: 1px solid #30363d;
+    vertical-align: middle;
+}
+
+.glossary-short {
+    margin: 6px 0 0;
+    font-size: 0.85rem;
+    color: #8b949e;
+    line-height: 1.45;
+}
+
+.glossary-detail {
+    margin: 10px 0 0;
+    font-size: 0.85rem;
+    color: #c9d1d9;
+    line-height: 1.55;
+    padding-top: 10px;
+    border-top: 1px solid #30363d;
+}

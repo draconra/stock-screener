@@ -3,14 +3,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from tradingview_screener import Query
 from services.indicators import compute_indicators, classify_candle, make_forecast
 from services.news import fetch_news
+from services.calibration import calibrator, auto_calibrate
 from screener_service import get_scalp_candidates
 from typing import Any
 import yfinance as yf
 import asyncio
+import logging
 import time
 
+logging.basicConfig(level=logging.INFO)
 
-app = FastAPI()
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    asyncio.create_task(asyncio.to_thread(auto_calibrate, calibrator, 20))
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

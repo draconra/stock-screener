@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { BarChart2, RefreshCw, Star, Newspaper } from 'lucide-react';
+import { BarChart2, RefreshCw, Star, Newspaper, BookOpen } from 'lucide-react';
 import { useStocks } from './hooks/useStocks';
 import { useFavorites } from './hooks/useFavorites';
 import { useSearch } from './hooks/useSearch';
 import ScreenerTab from './components/ScreenerTab';
 import FavoritesTab from './components/FavoritesTab';
 import NewsTab from './components/NewsTab';
+import GlossaryTab from './components/GlossaryTab';
 import TVChart from './components/TVChart';
 import ForecastCard from './components/ForecastCard';
 
-type TabType = 'screener' | 'favorites' | 'news';
+type TabType = 'screener' | 'favorites' | 'news' | 'glossary';
 
 function App() {
     const [selectedSymbol, setSelectedSymbol] = useState('IDX:OILS');
@@ -38,6 +39,10 @@ function App() {
                     <button className={`tab-btn ${activeTab === 'news' ? 'tab-active' : ''}`} onClick={() => setActiveTab('news')}>
                         <Newspaper size={14} />
                         News
+                    </button>
+                    <button className={`tab-btn ${activeTab === 'glossary' ? 'tab-active' : ''}`} onClick={() => setActiveTab('glossary')}>
+                        <BookOpen size={14} />
+                        Kamus
                     </button>
                 </div>
 
@@ -75,6 +80,7 @@ function App() {
                         />
                     )}
                     {activeTab === 'news' && <NewsTab />}
+                    {activeTab === 'glossary' && <GlossaryTab />}
                 </div>
 
                 <div className="chart-panel">
