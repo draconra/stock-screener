@@ -16,6 +16,8 @@ import logging
 import yfinance as yf
 import pandas as pd
 import numpy as np
+import os
+import json
 from dataclasses import dataclass, field
 from services.indicators import compute_indicators, classify_candle
 
@@ -278,7 +280,83 @@ def auto_calibrate(cal: Calibrator, n_tickers: int = 20) -> None:
     cal.calibrated = True
     log.info('Calibration complete. Updated table: %s',
              {k: v for k, v in cal.table.items() if v != _DEFAULT_TABLE.get(k)})
+             
+    # Try AI Calibration as a second pass
+    _ai_calibrate(cal, bt)
 
+def _ai_calibrate(cal: Calibrator, bt: pd.DataFrame) -> None:
+    """Passes the recent backtest data to GLM AI to suggest dynamic multiplier tweaks."""
+    api_key = os.environ.get("GLM_API_KEY")
+    if not api_key:
+        log.warning("AI Calibration skipped: GLM_API_KEY not set in environment.")
+        return
+        
+    try:
+        from zhipuai import ZhipuAI
+        client = ZhipuAI(api_key=api_key)
+        
+        # Summarize the backtest data for the AI to reduce token usage
+        summary = bt.groupby(['signal', 'tier']).agg({
+            'mae': ['mean', 'median', lambda x: x.quantile(0.75)],
+            'mfe': ['mean', 'median', lambda x: x.quantile(0.75)],
+        }).round(3).reset_index()
+        summary.columns = ['signal', 'tier', 'mae_mean', 'mae_p50', 'mae_p75', 'mfe_mean', 'mfe_p50', 'mfe_p75']
+        
+        current_table_str = json.dumps({f"{k[0]}|{k[1]}": v for k, v in cal.table.items()})
+        bt_data_str = summary.to_csv(index=False)
+        
+        prompt = f"""
+You are an expert quantitative trading AI. We have an algorithm that trades the Indonesian Stock Exchange (IDX).
+Our current configuration for ATR multipliers per signal and volume tier is:
+{current_table_str}
+
+We ran a 6-month historical backtest on the top 20 most liquid IDX stocks. Here is the summary of Maximum Adverse Excursion (MAE) and Maximum Favorable Excursion (MFE) scaled by ATR:
+{bt_data_str}
+
+Please analyze this data and suggest updated 'buy_depth', 'target_lo', and 'target_hi' values.
+- buy_depth represents the pullback depth to place a limit buy order.
+- target_lo and target_hi represent the sell zone multipliers.
+- We target a 2-3% net profit, and fees are 0.44% round-trip.
+- Respond ONLY with a valid JSON object matching the input structure (keys formatted as "SIGNAL|tier"). Do not include markdown formatting, backticks, or any conversational text.
+"""
+        log.info("Sending backtest summary to GLM AI for dynamic calibration...")
+        response = client.chat.completions.create(
+            model="glm-4-plus", # Use the generic GLM-4-plus model name as a final fallback
+            messages=[
+                {"role": "system", "content": "You are a quantitative trading system generating JSON configurations."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.1,
+            max_tokens=1024
+        )
+        
+        result_content = response.choices[0].message.content.strip()
+        
+        # Clean up any potential markdown formatting the AI might still include
+        if result_content.startswith("```json"):
+            result_content = result_content[7:]
+        if result_content.endswith("```"):
+            result_content = result_content[:-3]
+            
+        ai_suggestions = json.loads(result_content.strip())
+        
+        updated_count = 0
+        for k_str, v in ai_suggestions.items():
+            parts = k_str.split('|')
+            if len(parts) == 2:
+                sig, tier = parts[0], parts[1]
+                key = (sig, tier)
+                if key in cal.table:
+                    cal.table[key].update({
+                        'buy_depth': max(0.0, float(v.get('buy_depth', cal.table[key]['buy_depth']))),
+                        'target_lo': max(0.5, float(v.get('target_lo', cal.table[key]['target_lo']))),
+                        'target_hi': max(1.0, float(v.get('target_hi', cal.table[key]['target_hi']))),
+                    })
+                    updated_count += 1
+                    
+        log.info(f"AI Calibration complete. Applied {updated_count} adjustments based on GLM analysis.")
+    except Exception as e:
+        log.error(f"AI Calibration failed: {e}")
 
 # Module-level singleton
 calibrator = Calibrator()

@@ -13,6 +13,11 @@ import time
 import urllib.request
 import json as _json
 import datetime
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 

@@ -5,3 +5,5 @@ pandas
 numpy
 tradingview-screener
 feedparser
+zhipuai
+python-dotenv
