@@ -16,6 +16,15 @@ SELL_BB  = 0.85
 SELL_RSI = 65
 SELL_VOL = 1.5
 
+# Scalp: tight range, quick profit near EMA21
+SCALP_RSI = (40, 60)
+SCALP_VOL = 1.5
+
+# Reversal: oversold bounce with volume confirmation
+REVERSAL_RSI = 35       # RSI must be below this
+REVERSAL_VOL = 2.0      # Volume spike = smart money
+REVERSAL_BB  = 0.20     # Near or below Bollinger lower band
+
 
 def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     # RSI 14
@@ -86,6 +95,19 @@ def classify_candle(row) -> Optional[dict]:
 
     if bb > SELL_BB and rsi > SELL_RSI and vol > SELL_VOL:
         return {'position': 'aboveBar', 'color': '#e91e63', 'shape': 'arrowDown', 'text': 'SELL'}
+
+    # REVERSAL BUY: oversold + volume spike + price near BB lower (downtrend bounce)
+    stoch = row.get('Stoch_K', 50) if 'Stoch_K' in row.index else 50
+    if (not ema_up and (rsi < REVERSAL_RSI or stoch < 20)
+            and bb < REVERSAL_BB and vol > REVERSAL_VOL):
+        return {'position': 'belowBar', 'color': '#ff9800', 'shape': 'arrowUp', 'text': 'REVERSAL BUY'}
+
+    # SCALP: price near EMA21, moderate RSI, decent volume — quick in-out
+    ema21 = row['EMA21']
+    close = row['Close']
+    near_ema = abs(close - ema21) / ema21 < 0.015  # within 1.5% of EMA21
+    if (ema_up and near_ema and SCALP_RSI[0] <= rsi <= SCALP_RSI[1] and vol > SCALP_VOL):
+        return {'position': 'belowBar', 'color': '#00bcd4', 'shape': 'arrowUp', 'text': 'SCALP'}
 
     return None
 

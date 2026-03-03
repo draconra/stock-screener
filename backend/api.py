@@ -10,6 +10,9 @@ import yfinance as yf
 import asyncio
 import logging
 import time
+import urllib.request
+import json as _json
+import datetime
 
 logging.basicConfig(level=logging.INFO)
 
@@ -45,6 +48,19 @@ def _cache_set(key: str, val: Any) -> None:
 
 def format_ticker(symbol: str) -> str:
     return symbol.split(':')[-1] + ".JK"
+
+
+def get_market_status() -> str:
+    """IDX trading hours: 09:00–15:50 WIB (UTC+7), Mon–Fri."""
+    now_wib = datetime.datetime.utcnow() + datetime.timedelta(hours=7)
+    if now_wib.weekday() >= 5:  # Sat/Sun
+        return 'closed'
+    t = now_wib.hour * 60 + now_wib.minute
+    if 9 * 60 <= t <= 15 * 60 + 50:
+        return 'open'
+    if 8 * 60 <= t < 9 * 60:
+        return 'pre-market'
+    return 'closed'
 
 
 # ─── Endpoints ──────────────────────────────────────────────────
@@ -156,6 +172,86 @@ async def forecast(symbol: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/ihsg")
+async def ihsg():
+    cached = _cache_get("ihsg", 30)
+    if cached is not None:
+        return cached
+    try:
+        def _fetch():
+            # Yahoo Finance v8 chart API — instrumentType=INDEX has no declared delay
+            url = "https://query1.finance.yahoo.com/v8/finance/chart/%5EJKSE?interval=1m&range=1d"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                raw = _json.loads(r.read())
+
+            meta  = raw["chart"]["result"][0]["meta"]
+            price = float(meta["regularMarketPrice"])
+            prev  = float(meta.get("chartPreviousClose") or meta.get("previousClose") or price)
+            change     = price - prev
+            change_pct = (change / prev * 100) if prev else 0.0
+            market_ts  = int(meta.get("regularMarketTime") or 0)
+            delayed_by = meta.get("exchangeDataDelayedBy")  # None = real-time for INDEX
+
+            return {
+                "status": "success",
+                "data": {
+                    "price":         round(price, 2),
+                    "change":        round(change, 2),
+                    "change_pct":    round(change_pct, 2),
+                    "open":          round(float(meta.get("regularMarketOpen") or prev), 2),
+                    "day_high":      round(float(meta.get("regularMarketDayHigh") or price), 2),
+                    "day_low":       round(float(meta.get("regularMarketDayLow") or price), 2),
+                    "market_time":   market_ts,
+                    "delayed_by":    delayed_by if delayed_by is not None else 0,
+                    "market_status": get_market_status(),
+                }
+            }
+        result = await asyncio.to_thread(_fetch)
+        _cache_set("ihsg", result)
+        return result
+    except Exception as e:
+        logging.warning(f"IHSG fetch failed: {e}")
+        return {"status": "error", "message": str(e)}
+
+
+@app.get("/api/quote/{symbol}")
+async def quote(symbol: str):
+    """Real-time quote for a single IDX stock via Yahoo Finance (.JK)."""
+    cache_key = f"quote:{symbol.upper()}"
+    cached = _cache_get(cache_key, 30)
+    if cached is not None:
+        return cached
+    try:
+        def _fetch():
+            fi    = yf.Ticker(format_ticker(symbol)).fast_info
+            price = float(fi.last_price)
+            prev  = float(fi.previous_close or price)
+            change     = price - prev
+            change_pct = (change / prev * 100) if prev else 0.0
+            return {
+                "status": "success",
+                "data": {
+                    "ticker":      symbol.upper(),
+                    "price":       round(price, 0),
+                    "change":      round(change, 0),
+                    "change_pct":  round(change_pct, 2),
+                    "open":        round(float(fi.open or prev), 0),
+                    "day_high":    round(float(fi.day_high or price), 0),
+                    "day_low":     round(float(fi.day_low or price), 0),
+                    "volume":      int(fi.three_month_average_volume or 0),
+                    "market_cap":  int(fi.market_cap or 0),
+                    "market_status": get_market_status(),
+                }
+            }
+        result = await asyncio.to_thread(_fetch)
+        _cache_set(cache_key, result)
+        return result
+    except Exception as e:
+        logging.warning(f"Quote fetch failed for {symbol}: {e}")
+        return {"status": "error", "message": str(e)}
 
 
 @app.get("/api/news")

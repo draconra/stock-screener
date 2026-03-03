@@ -6,6 +6,7 @@ export function useStocks() {
     const [groupedStocks, setGroupedStocks] = useState<GroupedStocks>({});
     const [allStocks, setAllStocks] = useState<Stock[]>([]);
     const [loading, setLoading] = useState(true);
+    const [lastUpdated, setLastUpdated] = useState<string>('');
 
     const fetchStocks = async () => {
         setLoading(true);
@@ -16,6 +17,7 @@ export function useStocks() {
             if (result.status === 'success') {
                 setGroupedStocks(result.data);
                 setAllStocks(Object.values(result.data as GroupedStocks).flat());
+                setLastUpdated(new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
             }
         } catch (err) {
             console.error('Error fetching stocks:', err);
@@ -30,5 +32,5 @@ export function useStocks() {
         return () => clearInterval(interval);
     }, []);
 
-    return { groupedStocks, allStocks, loading, fetchStocks };
+    return { groupedStocks, allStocks, loading, lastUpdated, fetchStocks };
 }

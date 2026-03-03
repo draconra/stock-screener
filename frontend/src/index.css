@@ -382,6 +382,18 @@ body {
     border: 1px solid #30363d;
 }
 
+.signal-scalp {
+    background: #003d44;
+    color: #00bcd4;
+    border: 1px solid #00bcd4;
+}
+
+.signal-reversal {
+    background: #3d2200;
+    color: #ff9800;
+    border: 1px solid #ff9800;
+}
+
 /* ─── Glossary ──────────────────────────────────────────────── */
 .glossary-container {
     max-width: 720px;

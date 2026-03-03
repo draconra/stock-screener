@@ -12,6 +12,7 @@ export interface Stock {
     buy_high: number;
     sell_low: number;
     sell_high: number;
+    update_time?: number;
 }
 
 export interface GroupedStocks {

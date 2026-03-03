@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react';
 import { API_BASE } from '../config';
+import { useQuote } from '../hooks/useQuote';
 
 interface Factor {
     label: string;
@@ -56,6 +57,7 @@ const ForecastCard: React.FC<ForecastCardProps> = ({ symbol }) => {
     const [forecast, setForecast] = useState<ForecastData | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const { data: quote } = useQuote(symbol);
 
     useEffect(() => {
         const fetchForecast = async () => {
@@ -101,6 +103,28 @@ const ForecastCard: React.FC<ForecastCardProps> = ({ symbol }) => {
 
     return (
         <div className="forecast-card" style={{ borderColor: cfg.border, background: cfg.bg }}>
+            {/* Live quote bar */}
+            {quote && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px', padding: '5px 8px', background: 'rgba(255,255,255,0.04)', borderRadius: '5px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                        <span style={{
+                            width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                            background: quote.market_status === 'open' ? '#3fb950' : quote.market_status === 'pre-market' ? '#f0b429' : '#6e7681',
+                        }} />
+                        <span style={{ fontWeight: 700, fontSize: '1rem', color: '#e6edf3' }}>
+                            {quote.price.toLocaleString('id-ID')}
+                        </span>
+                        <span style={{ fontSize: '0.8rem', color: quote.change_pct >= 0 ? '#3fb950' : '#f85149' }}>
+                            {quote.change_pct >= 0 ? '+' : ''}{quote.change_pct.toFixed(2)}%
+                        </span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', fontSize: '0.68rem', color: '#8b949e' }}>
+                        <span>O: {quote.open.toLocaleString('id-ID')}</span>
+                        <span>H: {quote.day_high.toLocaleString('id-ID')}</span>
+                        <span>L: {quote.day_low.toLocaleString('id-ID')}</span>
+                    </div>
+                </div>
+            )}
             {/* Header */}
             <div className="forecast-header">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

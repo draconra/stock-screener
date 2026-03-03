@@ -5,6 +5,12 @@ import { Stock } from '../types';
 const fmt = (p: number) =>
     p > 0 ? p.toLocaleString('id-ID') : '—';
 
+const fmtTime = (ts?: number) => {
+    if (!ts) return '';
+    const d = new Date(ts * 1000);
+    return d.toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+};
+
 interface StockCardProps {
     stock: Stock;
     selected: boolean;
@@ -43,8 +49,17 @@ const StockCard: React.FC<StockCardProps> = ({
         </div>
         <div style={{ fontSize: '0.85rem', color: '#8b949e', marginTop: '6px' }}>Price: {stock.close}</div>
         <div style={{ fontSize: '0.85rem', color: '#8b949e' }}>RVOL: {stock.relative_volume_10d_calc?.toFixed(1)}x</div>
+        {stock.update_time && (
+            <div style={{ fontSize: '0.7rem', color: '#6e7681' }}>Last trade: {fmtTime(stock.update_time)}</div>
+        )}
         <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span className={`signal-badge ${stock.signal === 'STRONG BUY' ? 'signal-strong-buy' : stock.signal === 'WATCH' ? 'signal-watch' : 'signal-buy'}`}>
+            <span className={`signal-badge ${
+                stock.signal === 'STRONG BUY' ? 'signal-strong-buy' :
+                stock.signal === 'WATCH'      ? 'signal-watch' :
+                stock.signal === 'SCALP'      ? 'signal-scalp' :
+                stock.signal === 'REVERSAL'   ? 'signal-reversal' :
+                'signal-buy'
+            }`}>
                 {stock.signal}
             </span>
             <span style={{ color: '#8b949e', fontSize: '0.75rem' }}>RSI: {Math.round(stock.RSI || 0)}</span>
