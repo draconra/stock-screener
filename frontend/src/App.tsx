@@ -47,8 +47,10 @@ function App() {
                 </div>
 
                 <button onClick={fetchStocks} disabled={loading} style={{ background: '#21262d', border: '1px solid #30363d', color: 'white', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-                    Refresh
+                    <span className={loading ? 'animate-spin' : ''} style={{ display: 'inline-flex' }}>
+                        <RefreshCw size={18} />
+                    </span>
+                    {loading ? 'Loading…' : 'Refresh'}
                 </button>
             </div>
 

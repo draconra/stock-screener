@@ -9,6 +9,7 @@ export function useStocks() {
 
     const fetchStocks = async () => {
         setLoading(true);
+        const minDelay = new Promise(r => setTimeout(r, 800));
         try {
             const res    = await fetch(`${API_BASE}/api/candidates`);
             const result = await res.json();
@@ -19,6 +20,7 @@ export function useStocks() {
         } catch (err) {
             console.error('Error fetching stocks:', err);
         }
+        await minDelay;
         setLoading(false);
     };
 
