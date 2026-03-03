@@ -51,7 +51,7 @@ def get_scalp_candidates() -> dict:
         stoch  = float(row.get('Stoch.K') or 50)
 
         bb_pct = (close - bb_lo) / (bb_hi - bb_lo) if bb_hi > bb_lo else 0.5
-        near_ema = abs(close - ema21) / ema21 < 0.015
+        near_ema = abs(close - ema21) / ema21 < 0.012   # tighter: simulation showed 1.5% too loose
 
         if ema_up and STRONG_BUY_RSI[0] < rsi < STRONG_BUY_RSI[1] and vol > STRONG_BUY_VOL:
             return 'STRONG BUY'

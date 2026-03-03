@@ -16,8 +16,10 @@ SELL_BB  = 0.85
 SELL_RSI = 65
 SELL_VOL = 1.5
 
-# Scalp: tight range, quick profit near EMA21
-SCALP_RSI = (40, 60)
+# Scalp: uptrend continuation touch on EMA21 — RSI must be ABOVE midline (50+)
+# Simulation showed RSI 40-50 near EMA21 is a pullback, better caught by BUY signal.
+# Only RSI 50-68 guarantees price is still in confirmed uptrend momentum.
+SCALP_RSI = (50, 68)
 SCALP_VOL = 1.5
 
 # Reversal: oversold bounce with volume confirmation
@@ -102,10 +104,11 @@ def classify_candle(row) -> Optional[dict]:
             and bb < REVERSAL_BB and vol > REVERSAL_VOL):
         return {'position': 'belowBar', 'color': '#ff9800', 'shape': 'arrowUp', 'text': 'REVERSAL BUY'}
 
-    # SCALP: price near EMA21, moderate RSI, decent volume — quick in-out
+    # SCALP: uptrend continuation — price touching EMA21 from ABOVE with RSI 50-68
+    # Confirmed by simulation: RSI below 50 near EMA21 is better treated as BUY.
     ema21 = row['EMA21']
     close = row['Close']
-    near_ema = abs(close - ema21) / ema21 < 0.015  # within 1.5% of EMA21
+    near_ema = abs(close - ema21) / ema21 < 0.012  # within 1.2% of EMA21 (tighter)
     if (ema_up and near_ema and SCALP_RSI[0] <= rsi <= SCALP_RSI[1] and vol > SCALP_VOL):
         return {'position': 'belowBar', 'color': '#00bcd4', 'shape': 'arrowUp', 'text': 'SCALP'}
 

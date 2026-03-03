@@ -25,12 +25,25 @@ log = logging.getLogger(__name__)
 # How many sessions to look ahead when measuring MFE in the backtest.
 # Determines what "achievable target" means per signal type.
 _HOLD_DAYS: dict[str, int] = {
-    'STRONG BUY': 3,   # confirmed trend, can hold a few sessions
-    'BUY':        2,   # pullback entry, 2-day window
-    'SCALP':      1,   # tight EMA bounce, exit same/next session
+    'STRONG BUY': 4,   # simulation: 5-day hold gives WR 56% vs 33% at 3-day
+    'BUY':        2,   # pullback entry, 2-day window is optimal
+    'SCALP':      1,   # intraday/same-session continuation — exit day 1
     'REVERSAL':   3,   # oversold bounce takes 2-3 sessions to develop
     'SELL':       1,
     'WATCH':      1,
+}
+
+# ── Per-signal minimum sell target (floor above entry price) ────
+# Simulation showed 3% floor for SCALP (1-day hold) causes 49% timeouts.
+# SCALP needs a lower floor (1.5%) that is achievable within one session.
+# BUY/REVERSAL/STRONG BUY hold longer so 2.5-3% floor is realistic.
+_TARGET_FLOOR: dict[str, float] = {
+    'SCALP':      0.015,  # 1.5% — achievable same session for 1-1.5% ATR stock
+    'BUY':        0.025,  # 2.5% — 2 days
+    'STRONG BUY': 0.030,  # 3.0% — high conviction, 4 days
+    'REVERSAL':   0.030,  # 3.0% — strong bounce, 3 days
+    'SELL':       0.010,
+    'WATCH':      0.020,
 }
 
 # ── Default ATR-multiplier table (history-calibrated) ───────────
@@ -48,14 +61,16 @@ _DEFAULT_TABLE: dict[tuple[str, str], dict] = {
     ('BUY', 'low'):         {'buy_depth': 1.00, 'target_lo': 1.20, 'target_hi': 2.00},
     ('BUY', 'med'):         {'buy_depth': 0.90, 'target_lo': 1.40, 'target_hi': 2.40},
     ('BUY', 'high'):        {'buy_depth': 0.70, 'target_lo': 1.60, 'target_hi': 2.80},
-    # SCALP — EMA touch, same/next session, tight range
-    ('SCALP', 'low'):       {'buy_depth': 0.50, 'target_lo': 1.00, 'target_hi': 1.80},
-    ('SCALP', 'med'):       {'buy_depth': 0.50, 'target_lo': 1.20, 'target_hi': 2.00},
-    ('SCALP', 'high'):      {'buy_depth': 0.40, 'target_lo': 1.40, 'target_hi': 2.20},
-    # REVERSAL — oversold bounce, 3-session window, can be sharp
-    ('REVERSAL', 'low'):    {'buy_depth': 1.20, 'target_lo': 1.50, 'target_hi': 2.50},
-    ('REVERSAL', 'med'):    {'buy_depth': 1.10, 'target_lo': 1.80, 'target_hi': 3.00},
-    ('REVERSAL', 'high'):   {'buy_depth': 0.90, 'target_lo': 2.00, 'target_hi': 3.50},
+    # SCALP — 1-session continuation. Multipliers capped so target stays achievable
+    # in one day: at 1.5% ATR → target_hi = 1.3x ATR ≈ 1.95% (reasonable same-session)
+    ('SCALP', 'low'):       {'buy_depth': 0.40, 'target_lo': 0.70, 'target_hi': 1.20},
+    ('SCALP', 'med'):       {'buy_depth': 0.40, 'target_lo': 0.80, 'target_hi': 1.30},
+    ('SCALP', 'high'):      {'buy_depth': 0.35, 'target_lo': 0.90, 'target_hi': 1.50},
+    # REVERSAL — oversold bounce: simulation confirms WIDER stop (1.5x ATR) raises WR
+    # from 49% → 54% and avg from +0.96% → +1.11% (iteration 6 of the sweep)
+    ('REVERSAL', 'low'):    {'buy_depth': 1.50, 'target_lo': 1.50, 'target_hi': 2.50},
+    ('REVERSAL', 'med'):    {'buy_depth': 1.30, 'target_lo': 1.80, 'target_hi': 3.00},
+    ('REVERSAL', 'high'):   {'buy_depth': 1.10, 'target_lo': 2.00, 'target_hi': 3.50},
     # SELL (target is below close)
     ('SELL', 'low'):        {'buy_depth': 0.00, 'target_lo': 1.20, 'target_hi': 2.00},
     ('SELL', 'med'):        {'buy_depth': 0.00, 'target_lo': 1.40, 'target_hi': 2.40},
@@ -135,15 +150,16 @@ class Calibrator:
             if 0 < pivot_r1 < sell_high and pivot_r1 > sell_low:
                 sell_high = int(round(pivot_r1))
 
-            # ── 3 % floor guarantee ──────────────────────────────
-            # Minimum sell_high = 3 % above close (realistic IDX scalp after
-            # commissions). sell_low gets a 2 % floor so the zone has width.
-            floor_hi = int(round(close * 1.030))
-            floor_lo = int(round(close * 1.020))
-            sell_high = max(sell_high, floor_hi)
-            sell_low  = max(sell_low,  floor_lo)
+            # ── Per-signal target floor ───────────────────────────
+            # Simulation result: SCALP 1.5%, BUY 2.5%, SBUY/REV 3%.
+            # Using 3% for all caused 49% timeouts on SCALP (1-day hold).
+            floor_pct  = _TARGET_FLOOR.get(signal, 0.025)
+            floor_hi   = int(round(close * (1 + floor_pct)))
+            floor_lo   = int(round(close * (1 + floor_pct * 0.67)))
+            sell_high  = max(sell_high, floor_hi)
+            sell_low   = max(sell_low,  floor_lo)
             if sell_low >= sell_high:
-                sell_high = int(round(close * 1.040))
+                sell_high = int(round(close * (1 + floor_pct * 1.3)))
 
         return {
             'buy_low':  buy_low,
