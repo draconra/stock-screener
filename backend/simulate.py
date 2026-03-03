@@ -23,7 +23,7 @@ import numpy as np
 sys.path.insert(0, '.')
 from services.indicators import compute_indicators
 
-COMMISSION   = 0.0025   # 0.25% round-trip (typical IDX broker)
+COMMISSION   = 0.0044   # 0.44% round-trip (Buy: 0.15% + Sell: 0.25% + Levy: 0.04%)
 DATA_PERIOD  = '12mo'   # 12-month history
 
 # 30 most liquid IDX names across sectors
@@ -367,6 +367,12 @@ def load_data(tickers: list[str]) -> dict[str, pd.DataFrame]:
 def build_iterations() -> list[Config]:
     # Baseline
     c0 = Config(label='1. Baseline (current defaults)')
+    c0.scalp_rsi = (45, 55)
+    c0.scalp_ema_prx = 0.010
+    c0.scalp_hold = 2
+    c0.buy_hold = 3
+    c0.strong_buy_hold = 5
+    c0.reversal_hold = 5
 
     # 2. Tighter RVOL filter — require stronger volume confirmation
     c1 = Config(label='2. Tighter RVOL (≥2.0)')
@@ -431,7 +437,50 @@ def build_iterations() -> list[Config]:
     c9.strong_buy_hold  = 3
     c9.reversal_hold    = 3
 
-    return [c0, c1, c2, c3, c4, c5, c6, c7, c8, c9]
+    # 11. Max Win Rate (tiny targets, wide stop, long holds)
+    c10 = Config(label='11. Max Win Rate (quick exit, wide stop)')
+    c10.scalp_tgt = (0.5, 1.0)
+    c10.buy_tgt = (0.5, 1.0)
+    c10.strong_buy_tgt = (0.5, 1.0)
+    c10.reversal_tgt = (0.5, 1.0)
+    c10.target_floor = 0.015 # 1.5% minimum profit
+    c10.stop_atr_mult = 3.0
+    c10.hard_stop_pct = 0.08
+    c10.scalp_hold = 5
+    c10.buy_hold = 5
+    c10.strong_buy_hold = 5
+    c10.reversal_hold = 5
+    
+    # 12. Extremely Max Win Rate (80% target)
+    c11 = Config(label='12. Push for >80% Win Rate')
+    c11.scalp_tgt = (0.3, 0.7)
+    c11.buy_tgt = (0.3, 0.7)
+    c11.strong_buy_tgt = (0.3, 0.7)
+    c11.reversal_tgt = (0.3, 0.7)
+    c11.target_floor = 0.015 # 1.5% minimum profit to cover 0.44% fees safely + buffer
+    c11.stop_atr_mult = 5.0
+    c11.hard_stop_pct = 0.15
+    c11.scalp_hold = 10
+    c11.buy_hold = 10
+    c11.strong_buy_hold = 10
+    c11.reversal_hold = 10
+    
+    # 13. Target 2-3% Net Profit Per Trade
+    c12 = Config(label='13. Target 2-3% Net Profit (Floor 3.5%)')
+    c12.scalp_tgt = (1.2, 2.0)
+    c12.buy_tgt = (1.5, 2.5)
+    c12.strong_buy_tgt = (1.8, 3.0)
+    c12.reversal_tgt = (1.8, 3.0)
+    # To net 2-3% after 0.44% fee, we need a floor of around 3.0% - 3.5%
+    c12.target_floor = 0.035 
+    c12.stop_atr_mult = 2.0
+    c12.hard_stop_pct = 0.06
+    c12.scalp_hold = 3
+    c12.buy_hold = 5
+    c12.strong_buy_hold = 5
+    c12.reversal_hold = 5
+    
+    return [c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12]
 
 
 # ── Main ────────────────────────────────────────────────────────

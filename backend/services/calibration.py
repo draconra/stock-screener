@@ -25,10 +25,10 @@ log = logging.getLogger(__name__)
 # How many sessions to look ahead when measuring MFE in the backtest.
 # Determines what "achievable target" means per signal type.
 _HOLD_DAYS: dict[str, int] = {
-    'STRONG BUY': 4,   # simulation: 5-day hold gives WR 56% vs 33% at 3-day
-    'BUY':        2,   # pullback entry, 2-day window is optimal
-    'SCALP':      1,   # intraday/same-session continuation — exit day 1
-    'REVERSAL':   3,   # oversold bounce takes 2-3 sessions to develop
+    'STRONG BUY': 5,   # simulation: longer holds improve win rate
+    'BUY':        3,   # longer holds improve win rate
+    'SCALP':      2,   # longer holds improve win rate
+    'REVERSAL':   5,   # longer holds improve win rate
     'SELL':       1,
     'WATCH':      1,
 }
@@ -37,13 +37,14 @@ _HOLD_DAYS: dict[str, int] = {
 # Simulation showed 3% floor for SCALP (1-day hold) causes 49% timeouts.
 # SCALP needs a lower floor (1.5%) that is achievable within one session.
 # BUY/REVERSAL/STRONG BUY hold longer so 2.5-3% floor is realistic.
+# Updated floor to 3.5% minimum to safely clear the 0.44% round-trip trading fees and hit a 2-3% net profit per day
 _TARGET_FLOOR: dict[str, float] = {
-    'SCALP':      0.015,  # 1.5% — achievable same session for 1-1.5% ATR stock
-    'BUY':        0.025,  # 2.5% — 2 days
-    'STRONG BUY': 0.030,  # 3.0% — high conviction, 4 days
-    'REVERSAL':   0.030,  # 3.0% — strong bounce, 3 days
+    'SCALP':      0.035,  
+    'BUY':        0.035,
+    'STRONG BUY': 0.035,
+    'REVERSAL':   0.035,
     'SELL':       0.010,
-    'WATCH':      0.020,
+    'WATCH':      0.035,
 }
 
 # ── Default ATR-multiplier table (history-calibrated) ───────────
@@ -54,23 +55,23 @@ _TARGET_FLOOR: dict[str, float] = {
 # 3 % FLOOR is enforced in compute_ranges regardless of ATR size.
 _DEFAULT_TABLE: dict[tuple[str, str], dict] = {
     # STRONG BUY — high conviction pullback, holds 3 sessions
-    ('STRONG BUY', 'low'):  {'buy_depth': 0.80, 'target_lo': 1.50, 'target_hi': 2.50},
+    ('STRONG BUY', 'low'):  {'buy_depth': 0.80, 'target_lo': 1.80, 'target_hi': 3.00},
     ('STRONG BUY', 'med'):  {'buy_depth': 0.75, 'target_lo': 1.80, 'target_hi': 3.00},
-    ('STRONG BUY', 'high'): {'buy_depth': 0.60, 'target_lo': 2.00, 'target_hi': 3.50},
+    ('STRONG BUY', 'high'): {'buy_depth': 0.60, 'target_lo': 1.80, 'target_hi': 3.00},
     # BUY — standard momentum pullback, 2-session target
-    ('BUY', 'low'):         {'buy_depth': 1.00, 'target_lo': 1.20, 'target_hi': 2.00},
-    ('BUY', 'med'):         {'buy_depth': 0.90, 'target_lo': 1.40, 'target_hi': 2.40},
-    ('BUY', 'high'):        {'buy_depth': 0.70, 'target_lo': 1.60, 'target_hi': 2.80},
+    ('BUY', 'low'):         {'buy_depth': 1.00, 'target_lo': 1.50, 'target_hi': 2.50},
+    ('BUY', 'med'):         {'buy_depth': 0.90, 'target_lo': 1.50, 'target_hi': 2.50},
+    ('BUY', 'high'):        {'buy_depth': 0.70, 'target_lo': 1.50, 'target_hi': 2.50},
     # SCALP — 1-session continuation. Multipliers capped so target stays achievable
     # in one day: at 1.5% ATR → target_hi = 1.3x ATR ≈ 1.95% (reasonable same-session)
-    ('SCALP', 'low'):       {'buy_depth': 0.40, 'target_lo': 0.70, 'target_hi': 1.20},
-    ('SCALP', 'med'):       {'buy_depth': 0.40, 'target_lo': 0.80, 'target_hi': 1.30},
-    ('SCALP', 'high'):      {'buy_depth': 0.35, 'target_lo': 0.90, 'target_hi': 1.50},
+    ('SCALP', 'low'):       {'buy_depth': 0.40, 'target_lo': 1.20, 'target_hi': 2.00},
+    ('SCALP', 'med'):       {'buy_depth': 0.40, 'target_lo': 1.20, 'target_hi': 2.00},
+    ('SCALP', 'high'):      {'buy_depth': 0.35, 'target_lo': 1.20, 'target_hi': 2.00},
     # REVERSAL — oversold bounce: simulation confirms WIDER stop (1.5x ATR) raises WR
     # from 49% → 54% and avg from +0.96% → +1.11% (iteration 6 of the sweep)
-    ('REVERSAL', 'low'):    {'buy_depth': 1.50, 'target_lo': 1.50, 'target_hi': 2.50},
+    ('REVERSAL', 'low'):    {'buy_depth': 1.50, 'target_lo': 1.80, 'target_hi': 3.00},
     ('REVERSAL', 'med'):    {'buy_depth': 1.30, 'target_lo': 1.80, 'target_hi': 3.00},
-    ('REVERSAL', 'high'):   {'buy_depth': 1.10, 'target_lo': 2.00, 'target_hi': 3.50},
+    ('REVERSAL', 'high'):   {'buy_depth': 1.10, 'target_lo': 1.80, 'target_hi': 3.00},
     # SELL (target is below close)
     ('SELL', 'low'):        {'buy_depth': 0.00, 'target_lo': 1.20, 'target_hi': 2.00},
     ('SELL', 'med'):        {'buy_depth': 0.00, 'target_lo': 1.40, 'target_hi': 2.40},
