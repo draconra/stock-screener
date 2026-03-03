@@ -394,6 +394,13 @@ body {
     border: 1px solid #ff9800;
 }
 
+.signal-syariah {
+    background: #0d2818;
+    color: #4caf50;
+    border: 1px solid #2d6a35;
+    font-weight: normal;
+}
+
 /* ─── Glossary ──────────────────────────────────────────────── */
 .glossary-container {
     max-width: 720px;

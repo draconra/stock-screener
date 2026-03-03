@@ -53,15 +53,20 @@ const StockCard: React.FC<StockCardProps> = ({
             <div style={{ fontSize: '0.7rem', color: '#6e7681' }}>Last trade: {fmtTime(stock.update_time)}</div>
         )}
         <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span className={`signal-badge ${
-                stock.signal === 'STRONG BUY' ? 'signal-strong-buy' :
-                stock.signal === 'WATCH'      ? 'signal-watch' :
-                stock.signal === 'SCALP'      ? 'signal-scalp' :
-                stock.signal === 'REVERSAL'   ? 'signal-reversal' :
-                'signal-buy'
-            }`}>
-                {stock.signal}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span className={`signal-badge ${
+                    stock.signal === 'STRONG BUY' ? 'signal-strong-buy' :
+                    stock.signal === 'WATCH'      ? 'signal-watch' :
+                    stock.signal === 'SCALP'      ? 'signal-scalp' :
+                    stock.signal === 'REVERSAL'   ? 'signal-reversal' :
+                    'signal-buy'
+                }`}>
+                    {stock.signal}
+                </span>
+                {stock.is_syariah && (
+                    <span className="signal-badge signal-syariah">Syariah</span>
+                )}
+            </div>
             <span style={{ color: '#8b949e', fontSize: '0.75rem' }}>RSI: {Math.round(stock.RSI || 0)}</span>
         </div>
 

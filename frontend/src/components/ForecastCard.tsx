@@ -117,6 +117,13 @@ const ForecastCard: React.FC<ForecastCardProps> = ({ symbol }) => {
                         <span style={{ fontSize: '0.8rem', color: quote.change_pct >= 0 ? '#3fb950' : '#f85149' }}>
                             {quote.change_pct >= 0 ? '+' : ''}{quote.change_pct.toFixed(2)}%
                         </span>
+                        {quote.market_time > 0 && (
+                            <span style={{ fontSize: '0.65rem', color: '#6e7681', marginLeft: 2 }}
+                                title={`Data as of ${new Date(quote.market_time * 1000).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`}>
+                                {new Date(quote.market_time * 1000).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                                {quote.delayed_by > 0 && <span style={{ color: '#f0b429' }}> +{quote.delayed_by}m</span>}
+                            </span>
+                        )}
                     </div>
                     <div style={{ display: 'flex', gap: '8px', fontSize: '0.68rem', color: '#8b949e' }}>
                         <span>O: {quote.open.toLocaleString('id-ID')}</span>

@@ -45,8 +45,9 @@ function App() {
                                     {ihsg.change_pct >= 0 ? '+' : ''}{ihsg.change_pct.toFixed(2)}%
                                 </span>
                                 {ihsg.market_time > 0 && (
-                                    <span style={{ fontSize: '0.65rem', color: '#6e7681' }} title={ihsg.delayed_by === 0 ? 'Real-time' : `Delayed ${ihsg.delayed_by} min`}>
+                                    <span style={{ fontSize: '0.65rem', color: '#6e7681' }} title={`Data as of ${new Date(ihsg.market_time * 1000).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}`}>
                                         {new Date(ihsg.market_time * 1000).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                                        {ihsg.delayed_by > 0 && <span style={{ color: '#f0b429' }}> +{ihsg.delayed_by}m</span>}
                                     </span>
                                 )}
                             </div>

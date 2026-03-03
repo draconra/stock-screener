@@ -13,6 +13,7 @@ export interface Stock {
     sell_low: number;
     sell_high: number;
     update_time?: number;
+    is_syariah?: boolean;
 }
 
 export interface GroupedStocks {

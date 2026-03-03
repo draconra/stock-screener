@@ -1,4 +1,5 @@
 from tradingview_screener import Query, col
+from services.syariah import is_syariah
 from services.indicators import (
     STRONG_BUY_RSI, STRONG_BUY_VOL,
     BUY_RSI, BUY_VOL,
@@ -82,6 +83,8 @@ def get_scalp_candidates() -> dict:
 
     ranges = df.apply(_ranges, axis=1, result_type='expand')
     df[['buy_low', 'buy_high', 'sell_low', 'sell_high']] = ranges
+
+    df['is_syariah'] = df['name'].apply(is_syariah)
 
     grouped: dict = {}
     for sector, group in df.groupby('sector'):

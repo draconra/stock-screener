@@ -193,7 +193,10 @@ async def ihsg():
             change     = price - prev
             change_pct = (change / prev * 100) if prev else 0.0
             market_ts  = int(meta.get("regularMarketTime") or 0)
-            delayed_by = meta.get("exchangeDataDelayedBy")  # None = real-time for INDEX
+
+            # Measure actual delay — Yahoo Finance IDX data is consistently ~10 min
+            # despite exchangeDataDelayedBy=None (field is misleading for IDX)
+            actual_delay_min = round((time.time() - market_ts) / 60) if market_ts else 10
 
             return {
                 "status": "success",
@@ -205,7 +208,7 @@ async def ihsg():
                     "day_high":      round(float(meta.get("regularMarketDayHigh") or price), 2),
                     "day_low":       round(float(meta.get("regularMarketDayLow") or price), 2),
                     "market_time":   market_ts,
-                    "delayed_by":    delayed_by if delayed_by is not None else 0,
+                    "delayed_by":    actual_delay_min,
                     "market_status": get_market_status(),
                 }
             }
@@ -226,23 +229,31 @@ async def quote(symbol: str):
         return cached
     try:
         def _fetch():
-            fi    = yf.Ticker(format_ticker(symbol)).fast_info
-            price = float(fi.last_price)
-            prev  = float(fi.previous_close or price)
+            url = f"https://query1.finance.yahoo.com/v8/finance/chart/{format_ticker(symbol)}?interval=2m&range=1d"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=10) as r:
+                raw = _json.loads(r.read())
+
+            meta  = raw["chart"]["result"][0]["meta"]
+            price = float(meta["regularMarketPrice"])
+            prev  = float(meta.get("chartPreviousClose") or meta.get("previousClose") or price)
             change     = price - prev
             change_pct = (change / prev * 100) if prev else 0.0
+            market_ts  = int(meta.get("regularMarketTime") or 0)
+            actual_delay_min = round((time.time() - market_ts) / 60) if market_ts else 10
+
             return {
                 "status": "success",
                 "data": {
-                    "ticker":      symbol.upper(),
-                    "price":       round(price, 0),
-                    "change":      round(change, 0),
-                    "change_pct":  round(change_pct, 2),
-                    "open":        round(float(fi.open or prev), 0),
-                    "day_high":    round(float(fi.day_high or price), 0),
-                    "day_low":     round(float(fi.day_low or price), 0),
-                    "volume":      int(fi.three_month_average_volume or 0),
-                    "market_cap":  int(fi.market_cap or 0),
+                    "ticker":        symbol.upper(),
+                    "price":         round(price, 0),
+                    "change":        round(change, 0),
+                    "change_pct":    round(change_pct, 2),
+                    "open":          round(float(meta.get("regularMarketOpen") or prev), 0),
+                    "day_high":      round(float(meta.get("regularMarketDayHigh") or price), 0),
+                    "day_low":       round(float(meta.get("regularMarketDayLow") or price), 0),
+                    "market_time":   market_ts,
+                    "delayed_by":    actual_delay_min,
                     "market_status": get_market_status(),
                 }
             }

@@ -9,8 +9,8 @@ export interface QuoteData {
     open: number;
     day_high: number;
     day_low: number;
-    volume: number;
-    market_cap: number;
+    market_time: number;
+    delayed_by: number;
     market_status: 'open' | 'pre-market' | 'closed';
 }
 
