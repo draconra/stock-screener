@@ -339,6 +339,8 @@ body {
 
 .animate-spin {
     animation: spin 1s linear infinite;
+    display: inline-block;
+    transform-origin: center center;
 }
 
 /* Price range rows on stock cards */
@@ -511,4 +513,116 @@ body {
     line-height: 1.55;
     padding-top: 10px;
     border-top: 1px solid #30363d;
+}
+
+/* ─── Responsive ────────────────────────────────────────────── */
+
+/* Tablet: stack chart below grid */
+@media (max-width: 1024px) {
+    .main-content {
+        flex-direction: column;
+    }
+
+    .chart-panel {
+        width: 100%;
+        min-width: 0;
+        border-left: none;
+        border-top: 1px solid #30363d;
+        max-height: 50vh;
+    }
+
+    .grid-view {
+        max-height: none;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .top-bar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+        align-items: stretch;
+    }
+
+    .top-bar > div:first-child {
+        justify-content: center;
+    }
+
+    .top-bar > div:first-child h1 {
+        font-size: 1.1rem !important;
+    }
+
+    .tab-bar {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .tab-btn {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+
+    .top-bar > button:last-child {
+        align-self: center;
+    }
+
+    .grid-view {
+        padding: 0.5rem;
+    }
+
+    .stock-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.5rem;
+    }
+
+    .stock-card {
+        padding: 0.75rem;
+    }
+
+    .chart-panel {
+        max-height: 45vh;
+    }
+
+    .forecast-metrics {
+        gap: 6px;
+    }
+
+    .forecast-metric {
+        padding: 3px 6px;
+        min-width: 40px;
+    }
+
+    .sector-title {
+        font-size: 0.95rem;
+    }
+
+    .glossary-container {
+        max-width: 100%;
+    }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+    .stock-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tab-btn {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+        gap: 4px;
+    }
+
+    .chart-panel {
+        max-height: 40vh;
+    }
+
+    .search-box {
+        padding: 8px 10px;
+    }
+
+    .forecast-card {
+        padding: 8px 10px;
+    }
 }

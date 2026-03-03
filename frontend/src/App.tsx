@@ -83,10 +83,12 @@ function App() {
                     {activeTab === 'glossary' && <GlossaryTab />}
                 </div>
 
-                <div className="chart-panel">
-                    <ForecastCard symbol={selectedSymbol} />
-                    <TVChart symbol={selectedSymbol} />
-                </div>
+                {(activeTab === 'screener' || activeTab === 'favorites') && (
+                    <div className="chart-panel">
+                        <ForecastCard symbol={selectedSymbol} />
+                        <TVChart symbol={selectedSymbol} />
+                    </div>
+                )}
             </div>
         </div>
     );
