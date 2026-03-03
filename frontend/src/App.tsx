@@ -1,26 +1,33 @@
 import React, { useState } from 'react';
-import { BarChart2, RefreshCw, Star, Newspaper, BookOpen } from 'lucide-react';
+import { BarChart2, RefreshCw, Star, Newspaper, BookOpen, LogOut } from 'lucide-react';
 import { useStocks } from './hooks/useStocks';
 import { useIHSG } from './hooks/useIHSG';
 import { useFavorites } from './hooks/useFavorites';
 import { useSearch } from './hooks/useSearch';
+import { useAuth } from './hooks/useAuth';
 import ScreenerTab from './components/ScreenerTab';
 import FavoritesTab from './components/FavoritesTab';
 import NewsTab from './components/NewsTab';
 import GlossaryTab from './components/GlossaryTab';
 import TVChart from './components/TVChart';
 import ForecastCard from './components/ForecastCard';
+import LoginPage from './components/LoginPage';
 
 type TabType = 'screener' | 'favorites' | 'news' | 'glossary';
 
 function App() {
+    const { isAuthenticated, login, logout } = useAuth();
     const [selectedSymbol, setSelectedSymbol] = useState('IDX:OILS');
-    const [activeTab, setActiveTab]           = useState<TabType>('screener');
+    const [activeTab, setActiveTab] = useState<TabType>('screener');
 
     const { groupedStocks, allStocks, loading, lastUpdated, fetchStocks } = useStocks();
     const { data: ihsg } = useIHSG();
     const { favorites, favoriteStocks, toggleFavorite, removeFavorite } = useFavorites(allStocks);
     const { searchQuery, setSearchQuery, searchResults, searchLoading, clearSearch } = useSearch();
+
+    if (!isAuthenticated) {
+        return <LoginPage onLogin={login} />;
+    }
 
     return (
         <div className="dashboard-container">
@@ -84,6 +91,9 @@ function App() {
                             <RefreshCw size={18} />
                         </span>
                         {loading ? 'Loading…' : 'Refresh'}
+                    </button>
+                    <button onClick={logout} title="Logout" style={{ background: '#21262d', border: '1px solid #30363d', color: '#8b949e', padding: '8px', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}>
+                        <LogOut size={16} />
                     </button>
                 </div>
             </div>
