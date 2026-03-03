@@ -1,12 +1,14 @@
 """
 Dynamic price-range calibration.
 
-Static multipliers derived from 1-year backtest (1247 signals, 50 IDX stocks).
-At startup `auto_calibrate()` re-runs a lighter backtest on the top-20 most
-liquid stocks and updates the multipliers if the new data shifts the p50/p75
-ATR percentiles by more than 10 %.  The result is that buy-zone depth and
-sell-target reach automatically adapt to current market conditions (e.g. a
-high-vol regime widens the ranges).
+Multipliers are ATR-based. Auto-calibration runs at startup against the top-20
+most liquid IDX stocks (6-month history). The backtest uses pattern-specific
+forward windows (SCALP=1d, BUY=2d, STRONG BUY/REVERSAL=3d) so each signal's
+reachable high is measured appropriately.
+
+Sell targets always respect a 3 % floor: even low-ATR stocks show a minimum
+3 % gain zone, which is the realistic minimum for profitable IDX scalping
+after commissions (0.15–0.25 % round-trip typical Indonesian brokers).
 """
 
 from __future__ import annotations
@@ -19,25 +21,49 @@ from services.indicators import compute_indicators, classify_candle
 
 log = logging.getLogger(__name__)
 
-# ── Backtested defaults (derived from research) ─────────────────
-# Keys: (signal, vol_tier)  vol_tier = 'low' | 'med' | 'high'
+# ── Pattern-specific forward window (trading days) ──────────────
+# How many sessions to look ahead when measuring MFE in the backtest.
+# Determines what "achievable target" means per signal type.
+_HOLD_DAYS: dict[str, int] = {
+    'STRONG BUY': 3,   # confirmed trend, can hold a few sessions
+    'BUY':        2,   # pullback entry, 2-day window
+    'SCALP':      1,   # tight EMA bounce, exit same/next session
+    'REVERSAL':   3,   # oversold bounce takes 2-3 sessions to develop
+    'SELL':       1,
+    'WATCH':      1,
+}
+
+# ── Default ATR-multiplier table (history-calibrated) ───────────
+# target_lo = p50 MFE (median reachable gain / ATR)
+# target_hi = p75 MFE (75th-percentile reachable gain / ATR)
+# Typical active IDX ATR ≈ 1.5–3 % of price.
+# At 2 % ATR: 1.5x → 3 %, 2.0x → 4 %, 2.5x → 5 %.
+# 3 % FLOOR is enforced in compute_ranges regardless of ATR size.
 _DEFAULT_TABLE: dict[tuple[str, str], dict] = {
-    # STRONG BUY
-    ('STRONG BUY', 'low'):  {'buy_depth': 0.75, 'target_lo': 1.5,  'target_hi': 3.0},
-    ('STRONG BUY', 'med'):  {'buy_depth': 0.75, 'target_lo': 2.0,  'target_hi': 3.5},
-    ('STRONG BUY', 'high'): {'buy_depth': 0.60, 'target_lo': 2.5,  'target_hi': 5.0},
-    # BUY
-    ('BUY', 'low'):         {'buy_depth': 1.0,  'target_lo': 1.0,  'target_hi': 2.0},
-    ('BUY', 'med'):         {'buy_depth': 0.9,  'target_lo': 1.3,  'target_hi': 2.7},
-    ('BUY', 'high'):        {'buy_depth': 0.70, 'target_lo': 2.0,  'target_hi': 5.0},
-    # SELL (targets are ATR below close)
-    ('SELL', 'low'):        {'buy_depth': 0.0,  'target_lo': 1.2,  'target_hi': 2.5},
-    ('SELL', 'med'):        {'buy_depth': 0.0,  'target_lo': 1.3,  'target_hi': 2.6},
-    ('SELL', 'high'):       {'buy_depth': 0.0,  'target_lo': 1.5,  'target_hi': 3.3},
-    # WATCH — fallback
-    ('WATCH', 'low'):       {'buy_depth': 1.0,  'target_lo': 1.0,  'target_hi': 1.8},
-    ('WATCH', 'med'):       {'buy_depth': 0.9,  'target_lo': 1.2,  'target_hi': 2.2},
-    ('WATCH', 'high'):      {'buy_depth': 0.8,  'target_lo': 1.5,  'target_hi': 3.0},
+    # STRONG BUY — high conviction pullback, holds 3 sessions
+    ('STRONG BUY', 'low'):  {'buy_depth': 0.80, 'target_lo': 1.50, 'target_hi': 2.50},
+    ('STRONG BUY', 'med'):  {'buy_depth': 0.75, 'target_lo': 1.80, 'target_hi': 3.00},
+    ('STRONG BUY', 'high'): {'buy_depth': 0.60, 'target_lo': 2.00, 'target_hi': 3.50},
+    # BUY — standard momentum pullback, 2-session target
+    ('BUY', 'low'):         {'buy_depth': 1.00, 'target_lo': 1.20, 'target_hi': 2.00},
+    ('BUY', 'med'):         {'buy_depth': 0.90, 'target_lo': 1.40, 'target_hi': 2.40},
+    ('BUY', 'high'):        {'buy_depth': 0.70, 'target_lo': 1.60, 'target_hi': 2.80},
+    # SCALP — EMA touch, same/next session, tight range
+    ('SCALP', 'low'):       {'buy_depth': 0.50, 'target_lo': 1.00, 'target_hi': 1.80},
+    ('SCALP', 'med'):       {'buy_depth': 0.50, 'target_lo': 1.20, 'target_hi': 2.00},
+    ('SCALP', 'high'):      {'buy_depth': 0.40, 'target_lo': 1.40, 'target_hi': 2.20},
+    # REVERSAL — oversold bounce, 3-session window, can be sharp
+    ('REVERSAL', 'low'):    {'buy_depth': 1.20, 'target_lo': 1.50, 'target_hi': 2.50},
+    ('REVERSAL', 'med'):    {'buy_depth': 1.10, 'target_lo': 1.80, 'target_hi': 3.00},
+    ('REVERSAL', 'high'):   {'buy_depth': 0.90, 'target_lo': 2.00, 'target_hi': 3.50},
+    # SELL (target is below close)
+    ('SELL', 'low'):        {'buy_depth': 0.00, 'target_lo': 1.20, 'target_hi': 2.00},
+    ('SELL', 'med'):        {'buy_depth': 0.00, 'target_lo': 1.40, 'target_hi': 2.40},
+    ('SELL', 'high'):       {'buy_depth': 0.00, 'target_lo': 1.60, 'target_hi': 2.80},
+    # WATCH — fallback, conservative
+    ('WATCH', 'low'):       {'buy_depth': 1.00, 'target_lo': 1.00, 'target_hi': 1.80},
+    ('WATCH', 'med'):       {'buy_depth': 0.90, 'target_lo': 1.20, 'target_hi': 2.00},
+    ('WATCH', 'high'):      {'buy_depth': 0.80, 'target_lo': 1.40, 'target_hi': 2.20},
 }
 
 
@@ -99,15 +125,25 @@ class Calibrator:
         target_hi = m['target_hi']
 
         if signal == 'SELL':
-            # Target is below close (take-profit for shorts / exit zone)
             sell_low  = int(round(close - target_hi * atr))
             sell_high = int(round(close - target_lo * atr))
         else:
             sell_low  = int(round(close + target_lo * atr))
             sell_high = int(round(close + target_hi * atr))
-            # Cap at monthly pivot R1 if it's a meaningful resistance
+
+            # Respect pivot R1 as a resistance ceiling when meaningful
             if 0 < pivot_r1 < sell_high and pivot_r1 > sell_low:
                 sell_high = int(round(pivot_r1))
+
+            # ── 3 % floor guarantee ──────────────────────────────
+            # Minimum sell_high = 3 % above close (realistic IDX scalp after
+            # commissions). sell_low gets a 2 % floor so the zone has width.
+            floor_hi = int(round(close * 1.030))
+            floor_lo = int(round(close * 1.020))
+            sell_high = max(sell_high, floor_hi)
+            sell_low  = max(sell_low,  floor_lo)
+            if sell_low >= sell_high:
+                sell_high = int(round(close * 1.040))
 
         return {
             'buy_low':  buy_low,
@@ -136,14 +172,21 @@ def _run_backtest(tickers: list[str], period: str = '6mo') -> pd.DataFrame:
                 atr_v  = float(row['ATR'])
                 if atr_v <= 0:
                     continue
-                highs  = [float(df.iloc[i+d]['High']) for d in range(1, 11)]
-                lows   = [float(df.iloc[i+d]['Low'])  for d in range(1, 11)]
-                if sig['text'] in ('STRONG BUY', 'BUY'):
-                    mfe = (max(highs) - close) / atr_v
-                    mae = (close - min(lows))  / atr_v
+                sig_name  = sig['text']
+                hold      = _HOLD_DAYS.get(sig_name, 1)
+                look_end  = min(i + 1 + hold, len(df))
+                fwd_slice = df.iloc[i+1:look_end]
+                if fwd_slice.empty:
+                    continue
+                # MFE = best high over holding window; MAE = worst low
+                fwd_high = float(fwd_slice['High'].max())
+                fwd_low  = float(fwd_slice['Low'].min())
+                if sig_name in ('STRONG BUY', 'BUY', 'SCALP', 'REVERSAL'):
+                    mfe = (fwd_high - close) / atr_v
+                    mae = (close - fwd_low)  / atr_v
                 else:
-                    mfe = (close - min(lows))  / atr_v
-                    mae = (max(highs) - close) / atr_v
+                    mfe = (close - fwd_low)  / atr_v
+                    mae = (fwd_high - close) / atr_v
                 rows.append({
                     'signal':    sig['text'],
                     'vol_ratio': float(row['Vol_ratio']),
@@ -209,9 +252,9 @@ def auto_calibrate(cal: Calibrator, n_tickers: int = 20) -> None:
         if _shifted(new_depth, old.get('buy_depth', 0)):
             updated['buy_depth'] = new_depth
         if _shifted(new_target_lo, old.get('target_lo', 0)):
-            updated['target_lo'] = max(new_target_lo, 0.5)  # floor
+            updated['target_lo'] = round(max(min(new_target_lo, 4.00), 0.80), 2)
         if _shifted(new_target_hi, old.get('target_hi', 0)):
-            updated['target_hi'] = max(new_target_hi, updated['target_lo'] + 0.3)
+            updated['target_hi'] = round(max(min(new_target_hi, 6.00), updated['target_lo'] + 0.30), 2)
 
         cal.table[key] = updated
 
