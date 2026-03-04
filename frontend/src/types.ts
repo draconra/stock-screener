@@ -14,6 +14,7 @@ export interface Stock {
     sell_high: number;
     update_time?: number;
     is_syariah?: boolean;
+    hype_score?: number;
 }
 
 export interface GroupedStocks {

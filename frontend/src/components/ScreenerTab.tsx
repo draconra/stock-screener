@@ -19,7 +19,7 @@ const ScreenerTab: React.FC<ScreenerTabProps> = ({
             <div key={sector} className="sector-section">
                 <div className="sector-title">{sector || 'Other'}</div>
                 <div className="stock-grid">
-                    {stocks.map(s => (
+                    {[...stocks].sort((a, b) => (b.hype_score || 0) - (a.hype_score || 0)).map(s => (
                         <StockCard
                             key={s.ticker}
                             stock={s}

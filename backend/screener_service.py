@@ -1,5 +1,8 @@
+import concurrent.futures
+
 from tradingview_screener import Query, col
 from services.syariah import is_syariah
+from services.news import analyze_ticker_hype
 from services.indicators import (
     STRONG_BUY_RSI, STRONG_BUY_VOL,
     BUY_RSI, BUY_VOL,
@@ -86,8 +89,21 @@ def get_scalp_candidates() -> dict:
 
     df['is_syariah'] = df['name'].apply(is_syariah)
 
+    # Concurrently fetch hype_score for all candidates
+    tickers = df['name'].tolist()
+    hype_scores = []
+    # Using 10 workers to balance speed and not overloading yfinance
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        # map guarantees results are returned in the exact order of `tickers`
+        results = list(executor.map(analyze_ticker_hype, tickers))
+        hype_scores = results
+    
+    df['hype_score'] = hype_scores
+
     grouped: dict = {}
     for sector, group in df.groupby('sector'):
-        grouped[sector or 'Other'] = group.sort_values('close').to_dict(orient='records')
+        # Sort by hype_score first, then by close price
+        sorted_group = group.sort_values(['hype_score', 'close'], ascending=[False, True])
+        grouped[sector or 'Other'] = sorted_group.to_dict(orient='records')
 
     return grouped

@@ -75,3 +75,36 @@ def fetch_news() -> dict:
 
     items.sort(key=lambda x: x.get("published_at", ""), reverse=True)
     return {"status": "success", "data": items[:80]}
+
+
+def analyze_ticker_hype(ticker: str) -> int:
+    """
+    Fetches recent news for a specific ticker (e.g., using yfinance) and calculates a hype score.
+    Returns an integer representing the aggregated sentiment score.
+    """
+    try:
+        import yfinance as yf
+        # Ensure we use the proper .JK suffix for Indonesian stocks if not present
+        if not ticker.endswith(".JK"):
+            query_ticker = f"{ticker}.JK"
+        else:
+            query_ticker = ticker
+            
+        news_items = yf.Ticker(query_ticker).news
+        if not news_items:
+            return 0
+            
+        score = 0
+        for item in news_items:
+            title = item.get("title", "")
+            if not title:
+                continue
+            sentiment = get_sentiment(title)
+            if sentiment == "bullish":
+                score += 1
+            elif sentiment == "bearish":
+                score -= 1
+        return score
+    except Exception as e:
+        # Silently fail and return 0 if news cannot be fetched to not break the screener
+        return 0

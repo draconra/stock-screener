@@ -27,7 +27,14 @@ const StockCard: React.FC<StockCardProps> = ({
 }) => (
     <div className={`stock-card ${selected ? 'active' : ''}`} onClick={onClick}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-            <span style={{ fontWeight: 'bold' }}>{stock.name}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontWeight: 'bold' }}>{stock.name}</span>
+                {stock.hype_score && stock.hype_score > 0 ? (
+                    <span className="signal-badge" style={{ backgroundColor: '#dc2626', color: '#fff', fontSize: '0.7rem' }}>
+                        🔥 Hype {stock.hype_score}
+                    </span>
+                ) : null}
+            </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span className={stock.change >= 0 ? 'price-up' : 'price-down'} style={{ fontSize: '0.9rem' }}>
                     {stock.change?.toFixed(2)}%
@@ -54,13 +61,12 @@ const StockCard: React.FC<StockCardProps> = ({
         )}
         <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <span className={`signal-badge ${
-                    stock.signal === 'STRONG BUY' ? 'signal-strong-buy' :
-                    stock.signal === 'WATCH'      ? 'signal-watch' :
-                    stock.signal === 'SCALP'      ? 'signal-scalp' :
-                    stock.signal === 'REVERSAL'   ? 'signal-reversal' :
-                    'signal-buy'
-                }`}>
+                <span className={`signal-badge ${stock.signal === 'STRONG BUY' ? 'signal-strong-buy' :
+                        stock.signal === 'WATCH' ? 'signal-watch' :
+                            stock.signal === 'SCALP' ? 'signal-scalp' :
+                                stock.signal === 'REVERSAL' ? 'signal-reversal' :
+                                    'signal-buy'
+                    }`}>
                     {stock.signal}
                 </span>
                 {stock.is_syariah && (
