@@ -131,7 +131,28 @@ async def history(symbol: str):
             for _, row in df.iterrows():
                 m = classify_candle(row)
                 if m:
-                    markers.append({'time': row['time'], **m})
+                    close = float(row['Close'])
+                    atr   = float(row['ATR'])
+                    ema21 = float(row['EMA21'])
+                    vol   = float(row['Vol_ratio'])
+                    bb_lo = float(row['BB_lower']) if 'BB_lower' in row.index else 0
+                    # Compute buy/sell price ranges for this signal
+                    ranges = calibrator.compute_ranges(
+                        signal=m['text'].replace(' BUY', ' BUY') if 'BUY' in m['text'] else m['text'],
+                        close=close,
+                        atr=atr if atr > 0 else close * 0.02,
+                        ema21=ema21 if ema21 > 0 else close,
+                        vol_ratio=vol,
+                        bb_lower=bb_lo,
+                    )
+                    markers.append({
+                        'time': row['time'],
+                        **m,
+                        'buy_low':   ranges['buy_low'],
+                        'buy_high':  ranges['buy_high'],
+                        'sell_low':  ranges['sell_low'],
+                        'sell_high': ranges['sell_high'],
+                    })
             chart_data = df[['time', 'Open', 'High', 'Low', 'Close']].rename(
                 columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close'}
             ).to_dict(orient='records')
