@@ -6,29 +6,13 @@ interface TVChartProps {
     symbol: string;
 }
 
-// Signal marker from the backend (includes price zones)
-interface SignalMarker {
-    time: string;
-    position: string;
-    color: string;
-    shape: string;
-    text: string;
-    buy_low?: number;
-    buy_high?: number;
-    sell_low?: number;
-    sell_high?: number;
-}
-
-// Colors for the price zone lines
-const BUY_ZONE_COLOR = 'rgba(38, 166, 154, 0.6)';    // teal
-const BUY_ZONE_BG = 'rgba(38, 166, 154, 0.06)';
-const SELL_ZONE_COLOR = 'rgba(239, 83, 80, 0.6)';     // red
-const SELL_ZONE_BG = 'rgba(239, 83, 80, 0.06)';
+const WEEK_BARS = 5; // trading days in 1 week
 
 const TVChart: React.FC<TVChartProps> = ({ symbol }) => {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<any>(null);
 
+    // Create chart instance once on mount
     useEffect(() => {
         if (!chartContainerRef.current) return;
 
@@ -46,6 +30,9 @@ const TVChart: React.FC<TVChartProps> = ({ symbol }) => {
             height: container.clientHeight || 400,
             timeScale: {
                 borderColor: '#30363d',
+                // Show dates clearly at the 1-week scale
+                timeVisible: true,
+                secondsVisible: false,
             },
             rightPriceScale: {
                 borderColor: '#30363d',
@@ -80,6 +67,7 @@ const TVChart: React.FC<TVChartProps> = ({ symbol }) => {
         };
     }, []);
 
+    // Fetch data and render whenever symbol changes
     useEffect(() => {
         const fetchData = async () => {
             if (!chartRef.current || !symbol) return;
@@ -92,16 +80,16 @@ const TVChart: React.FC<TVChartProps> = ({ symbol }) => {
                 if (result.status === 'success' && result.data?.length) {
                     candleSeries.setData(result.data);
 
-                    // Create markers using v5 API
+                    // Draw signal markers (arrows) on candles
                     if (result.markers?.length) {
-                        const markersPrimitive = createSeriesMarkers(candleSeries, result.markers);
-                        chartRef.current.markersPrimitive = markersPrimitive;
-
-                        // Draw buy/sell price zones for the LAST signal
-                        drawPriceZones(chart, candleSeries, result.markers);
+                        createSeriesMarkers(candleSeries, result.markers);
                     }
 
-                    chart.timeScale().fitContent();
+                    // Zoom the visible range to the last WEEK_BARS trading days
+                    const totalBars = result.data.length;
+                    const from = Math.max(0, totalBars - WEEK_BARS - 1);
+                    const to = totalBars - 1;
+                    chart.timeScale().setVisibleLogicalRange({ from, to });
                 }
             } catch (error) {
                 console.error('Error fetching chart data:', error);
@@ -123,93 +111,5 @@ const TVChart: React.FC<TVChartProps> = ({ symbol }) => {
         />
     );
 };
-
-/**
- * Draw horizontal price lines for the most recent signal's buy/sell zones.
- * Uses lightweight-charts' createPriceLine API on the candle series.
- */
-function drawPriceZones(
-    _chart: any,
-    candleSeries: any,
-    markers: SignalMarker[],
-) {
-    // Remove any previously drawn price lines
-    if (chartPriceLines.length > 0) {
-        for (const line of chartPriceLines) {
-            try { candleSeries.removePriceLine(line); } catch { /* noop */ }
-        }
-        chartPriceLines.length = 0;
-    }
-
-    // Find the most recent non-SELL signal (buy signals are actionable)
-    const lastSignal = [...markers]
-        .reverse()
-        .find(m => m.buy_low && m.buy_low > 0 && m.text !== 'SELL');
-
-    if (!lastSignal) return;
-
-    const { buy_low, buy_high, sell_low, sell_high, text } = lastSignal;
-
-    // Buy zone lines
-    if (buy_low && buy_low > 0) {
-        chartPriceLines.push(
-            candleSeries.createPriceLine({
-                price: buy_low,
-                color: BUY_ZONE_COLOR,
-                lineWidth: 1,
-                lineStyle: 2, // Dashed
-                axisLabelVisible: true,
-                title: `Buy Low`,
-                lineVisible: true,
-            })
-        );
-    }
-
-    if (buy_high && buy_high > 0 && buy_high !== buy_low) {
-        chartPriceLines.push(
-            candleSeries.createPriceLine({
-                price: buy_high,
-                color: BUY_ZONE_COLOR,
-                lineWidth: 1,
-                lineStyle: 2, // Dashed
-                axisLabelVisible: true,
-                title: `Buy High`,
-                lineVisible: true,
-            })
-        );
-    }
-
-    // Sell / target zone lines
-    if (sell_low && sell_low > 0) {
-        chartPriceLines.push(
-            candleSeries.createPriceLine({
-                price: sell_low,
-                color: SELL_ZONE_COLOR,
-                lineWidth: 1,
-                lineStyle: 2, // Dashed
-                axisLabelVisible: true,
-                title: `Target Low`,
-                lineVisible: true,
-            })
-        );
-    }
-
-    if (sell_high && sell_high > 0 && sell_high !== sell_low) {
-        chartPriceLines.push(
-            candleSeries.createPriceLine({
-                price: sell_high,
-                color: SELL_ZONE_COLOR,
-                lineWidth: 1,
-                lineStyle: 2, // Dashed
-                axisLabelVisible: true,
-                title: `Target High`,
-                lineVisible: true,
-            })
-        );
-    }
-}
-
-// Module-level array to track price lines so we can remove them on refresh
-const chartPriceLines: any[] = [];
 
 export default TVChart;
