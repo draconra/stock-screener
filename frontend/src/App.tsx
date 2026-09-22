@@ -1,29 +1,39 @@
 import React, { useState } from 'react';
-import { BarChart2, RefreshCw, Star, Newspaper, BookOpen, LogOut } from 'lucide-react';
+import { BarChart2, RefreshCw, Star, Newspaper, BookOpen, LogOut, Landmark } from 'lucide-react';
 import { useStocks } from './hooks/useStocks';
 import { useIHSG } from './hooks/useIHSG';
 import { useFavorites } from './hooks/useFavorites';
 import { useSearch } from './hooks/useSearch';
 import { useAuth } from './hooks/useAuth';
+import { useFundamentals, FundamentalFilters } from './hooks/useFundamentals';
 import ScreenerTab from './components/ScreenerTab';
 import FavoritesTab from './components/FavoritesTab';
 import NewsTab from './components/NewsTab';
 import GlossaryTab from './components/GlossaryTab';
+import InvestTab from './components/InvestTab';
 import TVChart from './components/TVChart';
 import ForecastCard from './components/ForecastCard';
+import FundamentalDetail from './components/FundamentalDetail';
 import LoginPage from './components/LoginPage';
 
-type TabType = 'screener' | 'favorites' | 'news' | 'glossary';
+type TabType = 'screener' | 'invest' | 'favorites' | 'news' | 'glossary';
 
 function App() {
     const { isAuthenticated, login, logout } = useAuth();
     const [selectedSymbol, setSelectedSymbol] = useState('IDX:OILS');
+    const [selectedFundTicker, setSelectedFundTicker] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<TabType>('screener');
+    const [fundFilters, setFundFilters] = useState<FundamentalFilters>({ minScore: 0, syariahOnly: false, sector: '' });
 
     const { groupedStocks, allStocks, loading, lastUpdated, fetchStocks } = useStocks();
     const { data: ihsg } = useIHSG();
     const { favorites, favoriteStocks, toggleFavorite, removeFavorite } = useFavorites(allStocks);
     const { searchQuery, setSearchQuery, searchResults, searchLoading, clearSearch } = useSearch();
+    const { data: fundData, loading: fundLoading, error: fundError } = useFundamentals(fundFilters);
+
+    const selectedFundStock = selectedFundTicker
+        ? Object.values(fundData?.groups || {}).flat().find(s => s.ticker === selectedFundTicker) || null
+        : null;
 
     if (!isAuthenticated) {
         return <LoginPage onLogin={login} />;
@@ -69,6 +79,10 @@ function App() {
                 <div className="tab-bar">
                     <button className={`tab-btn ${activeTab === 'screener' ? 'tab-active' : ''}`} onClick={() => setActiveTab('screener')}>
                         Screener
+                    </button>
+                    <button className={`tab-btn ${activeTab === 'invest' ? 'tab-active' : ''}`} onClick={() => setActiveTab('invest')}>
+                        <Landmark size={14} />
+                        Investasi
                     </button>
                     <button className={`tab-btn ${activeTab === 'favorites' ? 'tab-active' : ''}`} onClick={() => setActiveTab('favorites')}>
                         <Star size={14} fill={activeTab === 'favorites' ? '#f0b429' : 'none'} color={activeTab === 'favorites' ? '#f0b429' : '#8b949e'} />
@@ -125,6 +139,17 @@ function App() {
                             clearSearch={clearSearch}
                         />
                     )}
+                    {activeTab === 'invest' && (
+                        <InvestTab
+                            data={fundData}
+                            loading={fundLoading}
+                            error={fundError}
+                            filters={fundFilters}
+                            setFilters={setFundFilters}
+                            selectedTicker={selectedFundTicker}
+                            onSelect={setSelectedFundTicker}
+                        />
+                    )}
                     {activeTab === 'news' && <NewsTab />}
                     {activeTab === 'glossary' && <GlossaryTab />}
                 </div>
@@ -133,6 +158,15 @@ function App() {
                     <div className="chart-panel">
                         <ForecastCard symbol={selectedSymbol} />
                         <TVChart symbol={selectedSymbol} />
+                    </div>
+                )}
+                {activeTab === 'invest' && (
+                    // Deliberately NOT ForecastCard here -- it renders a next-day
+                    // "Likely UP tomorrow" prediction, which next to a multi-year
+                    // verdict would undo the entire point of separating these tabs.
+                    <div className="chart-panel">
+                        <FundamentalDetail stock={selectedFundStock} />
+                        {selectedFundTicker && <TVChart symbol={selectedFundTicker} />}
                     </div>
                 )}
             </div>

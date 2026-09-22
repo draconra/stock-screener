@@ -1069,3 +1069,193 @@ body {
         padding: 8px 10px;
     }
 }
+
+/* ─── Fundamental / Investasi tab ───────────────────────────────────────── */
+/* Same dark palette as the rest of the app (#0d1117 / #161b22 / #30363d).
+   Kept as its own block so this feature's styling can be reviewed and
+   removed independently of the scalper's CSS. */
+
+.fund-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-left-width: 3px;
+    border-radius: 8px;
+    padding: 14px;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.fund-card:hover {
+    transform: translateY(-2px);
+}
+
+.fund-card.active {
+    background: #1c2128;
+}
+
+.fund-card.verdict-strong { border-left-color: #3fb950; }
+.fund-card.verdict-good { border-left-color: #26a69a; }
+.fund-card.verdict-fair { border-left-color: #f0b429; }
+.fund-card.verdict-weak { border-left-color: #6e7681; }
+.fund-card.verdict-insufficient { border-left-color: #8b949e; border-style: dashed; }
+
+.fund-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.pillar-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    color: #8b949e;
+}
+
+.pillar-bar-bg {
+    flex: 1;
+    height: 5px;
+    background: #21262d;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.pillar-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s;
+}
+
+.fund-filters {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+.fund-filters label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fund-checkbox {
+    cursor: pointer;
+}
+
+.fund-filters select {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+
+.fund-filter-toggle {
+    background: #21262d;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    cursor: pointer;
+}
+
+.fund-filter-toggle:hover {
+    color: #e6edf3;
+    border-color: #1f6feb;
+}
+
+.funnel-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 0.72rem;
+    color: #8b949e;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+}
+
+.funnel-arrow {
+    color: #30363d;
+}
+
+.rejected-list {
+    max-height: 200px;
+    overflow-y: auto;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 0.75rem;
+}
+
+.rejected-row {
+    padding: 3px 0;
+    color: #8b949e;
+    border-bottom: 1px solid #1c2128;
+}
+
+.fund-detail {
+    padding: 4px 2px;
+}
+
+.detail-section-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6e7681;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #21262d;
+}
+
+.criteria-table {
+    display: flex;
+    flex-direction: column;
+}
+
+.criteria-group-title {
+    font-size: 0.68rem;
+    color: #6e7681;
+    margin-top: 8px;
+    margin-bottom: 2px;
+}
+
+.criteria-row {
+    display: grid;
+    grid-template-columns: 16px 1fr auto;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid #1c2128;
+    font-size: 0.75rem;
+    color: #c9d1d9;
+}
+
+.criteria-row.is-gate {
+    background: rgba(31, 111, 235, 0.06);
+}
+
+.criteria-status-pass { color: #3fb950; }
+.criteria-status-fail { color: #f85149; }
+.criteria-status-warn { color: #f0b429; }
+.criteria-status-skipped,
+.criteria-status-missing { color: #6e7681; }
+
+@media (max-width: 480px) {
+    .fund-filters {
+        gap: 10px;
+    }
+}
