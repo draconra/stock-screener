@@ -21,10 +21,28 @@ import pandas as pd
 import numpy as np
 
 sys.path.insert(0, '.')
-from services.indicators import compute_indicators
+from services.indicators import (
+    compute_indicators,
+    STRONG_BUY_RSI, STRONG_BUY_VOL,
+    BUY_RSI, BUY_VOL,
+    SCALP_RSI, SCALP_VOL, SCALP_EMA_PROXIMITY,
+    REVERSAL_RSI, REVERSAL_VOL, REVERSAL_BB,
+)
+from services.signal_engine import classify_signal, SignalInputs, SignalThresholds
 
 COMMISSION   = 0.0044   # 0.44% round-trip (Buy: 0.15% + Sell: 0.25% + Levy: 0.04%)
 DATA_PERIOD  = '12mo'   # 12-month history
+
+# IDX's Auto Reject Atas/Bawah (ARA/ARB) price-limit bands changed three
+# times in recent history: a pandemic-era asymmetric regime (35% up / 7%
+# down) ran until ~May 2023, a 15%/15% transition from 5 Jun 2023, then the
+# current symmetric bands (Rp50-200: ±35%, >200-5,000: ±25%, >5,000: ±20%)
+# took effect 4 Sep 2023. A backtest spanning the older regimes mixes ATR
+# and Bollinger-width distributions from three different volatility ceilings.
+# DATA_PERIOD='12mo' run from "today" stays entirely inside the current
+# regime, so this is a guard for future callers who might widen the window,
+# not a behavior change today.
+ARA_ARB_REGIME_CHANGE_DATE = pd.Timestamp('2023-09-04', tz=None)
 
 # 30 most liquid IDX names across sectors
 IDX_TICKERS = [
@@ -49,20 +67,26 @@ class Config:
     require_ema_up: bool = True     # only long when EMA9 > EMA21
 
     # ── Signal thresholds
-    scalp_rsi:     tuple = (40, 60)
-    scalp_ema_prx: float = 0.015   # within 1.5% of EMA21
-    scalp_vol:     float = 1.5
+    # Defaults match indicators.py's canonical constants -- the same values
+    # screener_service.py and classify_candle() use via signal_engine
+    # .classify_signal(). Previously this Config had its own independent
+    # defaults (scalp_rsi=(40,60), scalp_ema_prx=0.015) that didn't match
+    # either of the other two implementations, so "baseline" backtest
+    # results didn't describe what was actually live.
+    scalp_rsi:     tuple = SCALP_RSI
+    scalp_ema_prx: float = SCALP_EMA_PROXIMITY
+    scalp_vol:     float = SCALP_VOL
 
-    reversal_rsi:  float = 35.0    # RSI must be below this
-    reversal_bb:   float = 0.20    # BB_pct must be below this
-    reversal_vol:  float = 2.0
+    reversal_rsi:  float = REVERSAL_RSI
+    reversal_bb:   float = REVERSAL_BB
+    reversal_vol:  float = REVERSAL_VOL
 
-    buy_rsi:       tuple = (30, 55)
-    buy_vol:       float = 1.5
+    buy_rsi:       tuple = BUY_RSI
+    buy_vol:       float = BUY_VOL
     buy_pullback:  tuple = (1, 3)  # consecutive down days
 
-    strong_buy_rsi: tuple = (30, 50)
-    strong_buy_vol: float = 2.0
+    strong_buy_rsi: tuple = STRONG_BUY_RSI
+    strong_buy_vol: float = STRONG_BUY_VOL
     strong_buy_pb:  tuple = (2, 3)
 
     # ── ATR multipliers for targets  (lo = p50, hi = p75 MFE / ATR)
@@ -86,59 +110,55 @@ class Config:
 
 
 # ── Signal detection ────────────────────────────────────────────
+# Delegates to services.signal_engine.classify_signal() -- the same
+# function screener_service._signal() and indicators.classify_candle() use.
+# Previously this was a third, independent if/elif chain with its own
+# condition ordering (REVERSAL, then SCALP, then STRONG BUY, then BUY --
+# different from both other implementations) and no TREND-BUY / SELL
+# branches at all, so this backtest measured a signal definition that
+# didn't match what was actually served to users. `vol >= X` here (vs `>`
+# in the other two) is preserved via `>` in classify_signal -- close enough
+# not to matter at float precision, not worth a fourth threshold operator.
 
 def detect_signal(row: pd.Series, cfg: Config) -> Optional[str]:
-    rsi       = float(row['RSI'])
-    vol       = float(row['Vol_ratio'])
-    bb        = float(row['BB_pct'])
-    close     = float(row['Close'])
-    ema9      = float(row['EMA9'])
-    ema21     = float(row['EMA21'])
-    atr       = float(row['ATR'])
-    pullback  = int(row['consec_down'])
-    stoch_k   = float(row.get('Stoch_K', 50))
-
+    close = float(row['Close'])
+    atr   = float(row['ATR'])
     if close <= 0 or atr <= 0:
         return None
     atr_pct = atr / close
-    ema_up  = ema9 > ema21
-
-    # Pre-filters
-    if vol < cfg.min_rvol or atr_pct < cfg.min_atr_pct:
+    if float(row['Vol_ratio']) < cfg.min_rvol or atr_pct < cfg.min_atr_pct:
         return None
 
-    # REVERSAL: downtrend oversold bounce with volume spike
-    if ((rsi < cfg.reversal_rsi or stoch_k < 20)
-            and bb < cfg.reversal_bb
-            and vol >= cfg.reversal_vol
-            and (not cfg.require_ema_up or not ema_up)):
-        return 'REVERSAL'
+    ema9  = float(row['EMA9'])
+    ema21 = float(row['EMA21'])
+    ema50 = float(row['EMA50']) if 'EMA50' in row.index else None
+    stoch = float(row['Stoch_K']) if 'Stoch_K' in row.index else None
 
-    # Uptrend required for remaining signals
-    if cfg.require_ema_up and not ema_up:
-        return None
-
-    # SCALP: price hugging EMA21, moderate RSI, volume confirmation
-    ema_proximity = abs(close - ema21) / ema21 if ema21 > 0 else 1.0
-    if (cfg.scalp_rsi[0] <= rsi <= cfg.scalp_rsi[1]
-            and ema_proximity <= cfg.scalp_ema_prx
-            and vol >= cfg.scalp_vol):
-        return 'SCALP'
-
-    # STRONG BUY: pullback in strong uptrend with volume surge
-    if (cfg.strong_buy_pb[0] <= pullback <= cfg.strong_buy_pb[1]
-            and cfg.strong_buy_rsi[0] < rsi < cfg.strong_buy_rsi[1]
-            and vol >= cfg.strong_buy_vol
-            and bb < 0.50):
-        return 'STRONG BUY'
-
-    # BUY: standard pullback entry
-    if (cfg.buy_pullback[0] <= pullback <= cfg.buy_pullback[1]
-            and cfg.buy_rsi[0] < rsi < cfg.buy_rsi[1]
-            and vol >= cfg.buy_vol):
-        return 'BUY'
-
-    return None
+    ind: SignalInputs = {
+        'rsi': float(row['RSI']),
+        'vol_ratio': float(row['Vol_ratio']),
+        'bb_pct': float(row['BB_pct']),
+        'close': close,
+        'ema21': ema21,
+        'ema_up': ema9 > ema21,
+        'ema_stack': (ema9 > ema21 > ema50) if ema50 is not None else None,
+        'consec_down': int(row['consec_down']),
+        'stoch_k': stoch,
+    }
+    thresholds = SignalThresholds(
+        strong_buy_rsi=cfg.strong_buy_rsi, strong_buy_vol=cfg.strong_buy_vol,
+        strong_buy_pullback=cfg.strong_buy_pb,
+        buy_rsi=cfg.buy_rsi, buy_vol=cfg.buy_vol, buy_pullback=cfg.buy_pullback,
+        scalp_rsi=cfg.scalp_rsi, scalp_vol=cfg.scalp_vol, scalp_ema_proximity=cfg.scalp_ema_prx,
+        reversal_rsi=cfg.reversal_rsi, reversal_vol=cfg.reversal_vol, reversal_bb=cfg.reversal_bb,
+        require_ema_up=cfg.require_ema_up,
+    )
+    sig = classify_signal(ind, thresholds)
+    # This backtester only models long entries (see simulate() below) -- it
+    # has no short/exit trade model, so SELL and WATCH both mean "no trade"
+    # here, same as the original contract (this function always returned
+    # None for anything but the four long signal types).
+    return sig if sig in ('STRONG BUY', 'BUY', 'SCALP', 'REVERSAL') else None
 
 
 # ── Trade record ────────────────────────────────────────────────
@@ -147,6 +167,7 @@ def detect_signal(row: pd.Series, cfg: Config) -> Optional[str]:
 class Trade:
     ticker:      str
     signal:      str
+    entry_date:  pd.Timestamp   # needed to build a chronological equity curve in analyze()
     entry_price: float
     stop_price:  float
     target_lo:   float
@@ -187,6 +208,7 @@ def simulate(cfg: Config, data: dict[str, pd.DataFrame]) -> list[Trade]:
 
             # Entry: next day open; skip if gap-up > 1.5% above close
             next_row    = df.iloc[i + 1]
+            entry_date  = df.index[i + 1]
             entry_price = float(next_row['Open'])
             if entry_price > close * 1.015:
                 continue
@@ -229,8 +251,21 @@ def simulate(cfg: Config, data: dict[str, pd.DataFrame]) -> list[Trade]:
                     break
 
                 if fwd_hi >= target_lo:
-                    # Exit at target_lo (limit order); cap at target_hi
-                    exit_price  = min(max(fwd_hi * 0.995, target_lo), target_hi)
+                    # Fill at target_lo exactly -- this is what a real limit
+                    # sell order does: it fills at its limit price the
+                    # instant that price is touched, not at some fraction
+                    # of the bar's eventual high. The previous formula
+                    # (`min(max(fwd_hi * 0.995, target_lo), target_hi)`)
+                    # used the bar's OWN high to set the exit price, which
+                    # is lookahead -- that high isn't known until the bar
+                    # closes, after the fill would have already happened.
+                    # This was the single largest source of optimism in the
+                    # backtest (inflating avg_win/expect/rr/pf together);
+                    # removing it is a reduction in complexity, not an
+                    # addition, and the resulting numbers are expected to be
+                    # lower than before -- that's the bias coming out, not a
+                    # new bug.
+                    exit_price  = target_lo
                     exit_reason = 'target'
                     break
 
@@ -243,7 +278,7 @@ def simulate(cfg: Config, data: dict[str, pd.DataFrame]) -> list[Trade]:
 
             pnl = (exit_price / entry_price - 1) * 100 - COMMISSION * 100
             trades.append(Trade(
-                ticker=ticker, signal=sig,
+                ticker=ticker, signal=sig, entry_date=entry_date,
                 entry_price=entry_price, stop_price=stop_price,
                 target_lo=target_lo, target_hi=target_hi,
                 exit_price=exit_price, exit_reason=exit_reason,
@@ -273,13 +308,31 @@ def analyze(trades: list[Trade]) -> dict:
     # Risk-reward ratio (positive number: avg_win / abs(avg_loss))
     rr = abs(avg_win / avg_loss) if avg_loss < 0 else float('inf')
 
-    # Annualised Sharpe (assume avg ~1.5 trades/week)
+    # Annualised Sharpe. Previously used a fixed `sqrt(252/2)` with a
+    # comment claiming "assume avg ~1.5 trades/week" -- but 252/2 = 126
+    # trades/year implies ~2.4/week, not 1.5; the comment and the formula
+    # disagreed with each other. Deriving the annualization factor from the
+    # actual observed trade frequency in this run removes the need to
+    # guess, and keeps the number honest about what was actually simulated.
+    # Caveat this doesn't fix: trades across the 30 tickers overlap in time,
+    # so they aren't independent draws the way a clean annualization
+    # assumes -- treat this Sharpe as indicative, not a rigorous one.
     sharpe = 0.0
-    if df['pnl_pct'].std() > 0:
-        sharpe = expect / df['pnl_pct'].std() * np.sqrt(252 / 2)
+    if df['pnl_pct'].std() > 0 and 'entry_date' in df.columns and len(df) > 1:
+        span_days = (df['entry_date'].max() - df['entry_date'].min()).days
+        trades_per_year = len(df) / max(span_days, 1) * 365.25
+        sharpe = expect / df['pnl_pct'].std() * np.sqrt(trades_per_year)
 
-    # Max drawdown via equity curve
-    equity      = (1 + df['pnl_pct'] / 100).cumprod()
+    # Max drawdown via a CHRONOLOGICAL equity curve. Previously `df` (and
+    # therefore `equity`) was in insertion order from simulate(), which
+    # loops ticker-outer / time-inner -- i.e. all of the first ticker's
+    # trades, then all of the second ticker's, etc. That is not an order
+    # any trader could have experienced, and the resulting "drawdown" was
+    # meaningless. Sorting by entry_date first makes it an actual
+    # chronological equity curve (still ignoring that trades can overlap
+    # across tickers -- see the Sharpe caveat above).
+    chrono      = df.sort_values('entry_date') if 'entry_date' in df.columns else df
+    equity      = (1 + chrono['pnl_pct'] / 100).cumprod()
     rolling_max = equity.cummax()
     max_dd      = ((equity - rolling_max) / rolling_max).min() * 100
 
@@ -359,6 +412,21 @@ def load_data(tickers: list[str]) -> dict[str, pd.DataFrame]:
         except Exception:
             pass
     print(f'Loaded {len(data)} tickers with sufficient history.')
+
+    # ARA/ARB regime guard: warn (not abort -- this is diagnostic, the
+    # sweep should still run) if any loaded history reaches back before the
+    # current symmetric price-limit regime took effect. See
+    # ARA_ARB_REGIME_CHANGE_DATE's definition above for why this matters.
+    earliest = min((df.index.min() for df in data.values() if len(df)), default=None)
+    if earliest is not None:
+        earliest_ts = earliest.tz_localize(None) if earliest.tzinfo else earliest
+        if earliest_ts < ARA_ARB_REGIME_CHANGE_DATE:
+            print(
+                f'WARNING: data reaches back to {earliest_ts.date()}, before the '
+                f'{ARA_ARB_REGIME_CHANGE_DATE.date()} ARA/ARB regime change. ATR and '
+                f'Bollinger-width distributions in this window mix at least two '
+                f'different price-limit regimes -- treat results with that in mind.'
+            )
     return data
 
 
