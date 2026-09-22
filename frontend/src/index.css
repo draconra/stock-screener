@@ -408,6 +408,21 @@ body {
     font-weight: normal;
 }
 
+/* SELL is now a reachable live-screener signal (previously only appeared on
+   chart markers) -- without this it fell through to .signal-buy, which
+   would show a bearish signal in a buy-colored badge. */
+.signal-sell {
+    background: #3d0f1a;
+    color: #f85149;
+    border: 1px solid #f85149;
+}
+
+.price-range-stop {
+    background: rgba(248, 81, 73, 0.1);
+    color: #f85149;
+    border: 1px solid rgba(248, 81, 73, 0.25);
+}
+
 /* ─── Glossary ──────────────────────────────────────────────── */
 .glossary-container {
     max-width: 720px;

@@ -12,6 +12,7 @@ export interface Stock {
     buy_high: number;
     sell_low: number;
     sell_high: number;
+    stop_loss: number;
     update_time?: number;
     is_syariah?: boolean;
     hype_score?: number;

@@ -11,9 +11,9 @@ These two tabs intentionally do not share scoring logic, caching strategy, or UI
 
 ## 🚀 Key Features
 
-*   **Real-time Screener:** Scans the IDX market during trading hours to find stocks meeting specific volume and volatility thresholds.
-*   **Four-Signal System:** Automatically classifies technical setups into `SCALP`, `BUY`, `STRONG BUY`, or `REVERSAL` signals.
-*   **Dynamic Calibration:** Uses Average True Range (ATR) to calculate exact buy depths and take-profit targets based on the current volatility of each specific stock.
+*   **Real-time Screener:** Scans the IDX market during trading hours to find stocks meeting specific volume and volatility thresholds, gated by real Rupiah turnover value (not just share count) so thinly-traded names don't slip through.
+*   **Five-Signal System:** One shared classifier (`services/signal_engine.py`) used by the live screener, the chart markers, and the backtest, producing `SCALP`, `BUY`, `STRONG BUY`, `REVERSAL`, or `SELL`.
+*   **Dynamic Calibration:** Uses Average True Range (ATR) to calculate exact buy depths, take-profit targets, and stop-loss levels based on the current volatility of each specific stock.
 *   **AI-Powered Optimization:** Integrates with ZhipuAI (GLM-4) to periodically analyze a 6-month historical backtest and dynamically adjust the trading multipliers based on shifting market conditions.
 *   **Syariah Compliance Filter:** Automatically tags stocks that are compliant with the Daftar Efek Syariah (DES).
 *   **Built-in Backtester:** Includes a robust simulation engine (`simulate.py`) to test configurations against historical data, calculating Win Rate, Expectancy, Risk/Reward, and Max Drawdown.
@@ -23,17 +23,26 @@ These two tabs intentionally do not share scoring logic, caching strategy, or UI
 
 ## 📈 The Trading Strategy
 
-The underlying logic relies on mean reversion within established trends, focusing on high-probability over high-yield:
+All five signal types below are now classified by one function,
+`services/signal_engine.py::classify_signal()` — the chart markers, the live
+screener, and the backtest all call it, so a stock labeled `SCALP` means the
+same thing everywhere. (This wasn't always true; see `backend/fundamentals/`
+sibling docs and the git history around this README section if you're
+curious why that distinction is called out explicitly.)
 
-1.  **SCALP:** Triggers when a stock in a confirmed uptrend dips briefly to touch the EMA21 support line (with RSI 45-55). Optimized for quick 1-2 day holds.
-2.  **BUY:** Standard momentum pullback. Triggers when an uptrending stock experiences 1-3 consecutive down days with elevated volume and an RSI of 30-55.
-3.  **STRONG BUY:** High conviction pullback. Triggers when the stock pulls back into a highly optimal oversold zone (RSI 30-50) while maintaining strong trading volume.
-4.  **REVERSAL:** Catches oversold bounces. Triggers when a stock drops below the lower Bollinger Band, becomes deeply oversold (RSI < 35), and shows a sudden spike in volume (indicating smart money buying the dip).
+1.  **SCALP:** Price hugging the EMA21 (within 1.0%) at a neutral RSI (45-55) in an uptrend. Checked before the broader BUY conditions below since it's the narrowest setup. Holds ~2 sessions.
+2.  **BUY:** Either a momentum pullback (RSI 30-55, elevated volume — on the chart, also requires 1-3 consecutive down days; the live screener works from a point-in-time snapshot and doesn't have that history, so it skips that leg) or a trend-continuation setup with the full EMA9>21>50 stack intact. Holds ~3 sessions.
+3.  **STRONG BUY:** The highest-conviction pullback — RSI 30-50 with a volume surge (>2x). On the chart this also requires a 2-3 day pullback; same snapshot-vs-history caveat as BUY. Holds ~5 sessions.
+4.  **REVERSAL:** Downtrend, oversold (RSI < 35 or Stochastic %K < 20), price in the **lower 20% of the Bollinger Band range** (not necessarily below the band itself), with a volume spike. Of the four, this is the one with the most direct support in IDX-specific research — individual investors, who dominate IDX turnover, trade contrarian rather than momentum (OJK Working Paper WP/18/04), and momentum itself isn't a significant IDX factor (Li, Wei & Zhang 2023, *Pacific-Basin Finance Journal* 82). Holds ~5 sessions.
+5.  **SELL:** Overbought exit signal (RSI > 65, price in the upper 15% of the Bollinger range, elevated volume) — independent of trend direction. Previously only appeared on chart markers; now reachable from the live screener too.
 
-### Profit Targets & Fees
-The algorithm enforces a hard minimum target floor of **3.5% gross profit** on every trade. This ensures that after paying the ~0.44% IDX round-trip trading fees, the trader walks away with a net profit of around 2.5% to 3.0%. 
+### Profit Targets, Stops & Fees
+Sell targets respect a per-signal minimum floor, graduated by how long that signal typically holds: **SCALP 1.5%** (2-day hold), **BUY 2.5%** (3-day), **STRONG BUY / REVERSAL 3.0%** (5-day) — not a single flat number for every signal, since a shorter hold needs a more achievable target. Round-trip fees are ~0.44% (0.15% buy + 0.25% sell + 0.04% levy — the figure used consistently across the screener, calibration, and backtest).
 
-Stop losses are set dynamically based on a multiple of the stock's ATR, generally favoring wider stops to prevent premature exits due to normal market noise.
+Stop-loss is the tighter of a 1.0×ATR distance and a 3% hard floor below the recommended entry price, computed the same way the backtest (`simulate.py`) evaluates stops, and now surfaced on every buy-type card in the UI (`stop_loss` in the API response).
+
+### Known Limitations
+This app's own feature set — RSI/EMA/ATR/Bollinger/Stochastic technicals at a 1-5 day horizon — has been tested directly on IDX by recent academic work: a December 2025 study (*Journal of Risk and Financial Management* 18(12):714) ran linear regression, ridge, random forest and XGBoost on nearly this exact feature set against LQ45 stocks at 5- and 21-day horizons, and found **49-54% directional accuracy** (AUC ~0.50-0.53), with every strategy tested underperforming buy-and-hold after transaction costs. Treat this screener's signals as a structured way to narrow down candidates worth a closer look — not as a high-precision buy/sell oracle. A rigorous walk-forward validation framework (train/test splits, Deflated Sharpe Ratio, Probability of Backtest Overfitting per Bailey & López de Prado) would be needed before trusting any backtested win rate from `simulate.py` at face value; that framework doesn't exist yet in this repo.
 
 ---
 

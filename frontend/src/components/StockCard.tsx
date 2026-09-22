@@ -65,7 +65,8 @@ const StockCard: React.FC<StockCardProps> = ({
                         stock.signal === 'WATCH' ? 'signal-watch' :
                             stock.signal === 'SCALP' ? 'signal-scalp' :
                                 stock.signal === 'REVERSAL' ? 'signal-reversal' :
-                                    'signal-buy'
+                                    stock.signal === 'SELL' ? 'signal-sell' :
+                                        'signal-buy'
                     }`}>
                     {stock.signal}
                 </span>
@@ -87,6 +88,12 @@ const StockCard: React.FC<StockCardProps> = ({
                     <span className="price-range-label">Target</span>
                     <span>{fmt(stock.sell_low)} – {fmt(stock.sell_high)}</span>
                 </div>
+                {stock.stop_loss > 0 && (
+                    <div className="price-range-row price-range-stop">
+                        <span className="price-range-label">Stop</span>
+                        <span>{fmt(stock.stop_loss)}</span>
+                    </div>
+                )}
             </div>
         )}
     </div>
