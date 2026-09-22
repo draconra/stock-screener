@@ -1,1 +1,14 @@
--r backend/requirements.txt
+# Kept in sync with backend/requirements.txt -- MUST be self-contained here.
+# Vercel's @vercel/python builder parses this file with its own resolver,
+# which does not support pip's `-r` include directive (breaks with
+# "could not parse requirements.txt: Error parsing included file").
+# Update both files together when a dependency changes.
+fastapi==0.128.8
+uvicorn[standard]==0.39.0
+yfinance==0.2.65
+pandas==2.3.2
+numpy==2.0.2
+tradingview-screener==3.1.0
+feedparser==6.0.12
+zhipuai==2.1.5.20250825
+python-dotenv==1.2.1
