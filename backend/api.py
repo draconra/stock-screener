@@ -3,9 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from tradingview_screener import Query
 from services.indicators import compute_indicators, classify_candle, make_forecast
 from services.news import fetch_news
+from services.syariah import is_syariah
 from services.calibration import calibrator, auto_calibrate
 from screener_service import get_scalp_candidates
-from typing import Any
+from fundamentals import store as fundamentals_store
+from fundamentals import screen as fundamentals_screen
+from fundamentals.config import CONFIG_VERSION, GATES, PILLAR_MAX_POINTS
+from typing import Any, Optional
 import yfinance as yf
 import asyncio
 import logging
@@ -278,6 +282,117 @@ async def news():
     result = await asyncio.to_thread(fetch_news)
     _cache_set("news", result)
     return result
+
+
+# ─── Fundamental (long-term) screener ────────────────────────────────────
+#
+# Separate horizon from everything above: fundamentals update quarterly, not
+# intraday, so this reads pre-computed CSV snapshots via `fundamentals.store`
+# (stdlib csv/json only -- no pandas, no network) rather than the TTL `_cache`
+# pattern used for the scalper. Data is refreshed offline (GitHub Actions,
+# see .github/workflows/fundamentals-refresh.yml) and committed to `data/` --
+# see backend/fundamentals/ for the full pipeline.
+#
+# `compute_indicators` (used by /api/history and /api/forecast above) is
+# never imported here -- the fundamental screener computes its own timing
+# hints independently so a future change to the scalper's indicators cannot
+# break this feature, and vice versa.
+
+_fundamentals_cache: dict[str, Any] = {}
+
+
+def _scored_fundamentals() -> list:
+    """Cached for the container's lifetime -- fundamentals data cannot go
+    stale mid-container (it only changes via a redeploy), so there is no TTL
+    to pick, unlike the scalper endpoints above."""
+    if "reports" not in _fundamentals_cache:
+        rows = list(fundamentals_store.latest_rows())
+        reports = fundamentals_screen.score_all(
+            rows, fundamentals_store.statements_for, is_syariah_fn=is_syariah
+        )
+        _fundamentals_cache["reports"] = reports
+        _fundamentals_cache["universe_size"] = len(rows)
+    return _fundamentals_cache["reports"]
+
+
+@app.get("/api/fundamental/config")
+async def fundamental_config():
+    """Renders the exact ruleset a verdict was computed under -- so a
+    verdict change a year from now is attributable to either the company or
+    a reviewed config change, never an untracked guess."""
+    return {
+        "status": "success",
+        "data": {"version": CONFIG_VERSION, "gates": GATES, "pillar_max_points": PILLAR_MAX_POINTS},
+    }
+
+
+@app.get("/api/fundamental/meta")
+async def fundamental_meta():
+    """Self-check -- hit this right after every deploy. If `rows_loaded` is
+    low or missing, `data/` was not bundled by Vercel (see vercel.json
+    includeFiles) even though everything works locally."""
+    try:
+        health = fundamentals_store.health()
+        health["rows_loaded"] = len(fundamentals_store.latest_rows()) if fundamentals_store.has_data() else 0
+        return {"status": "success", "data": health}
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"fundamentals data not available: {e}",
+            "data_dir": str(fundamentals_store.DATA_DIR),
+        }
+
+
+@app.get("/api/fundamental/screen")
+async def fundamental_screen(
+    min_score: int = 0,
+    syariah_only: bool = False,
+    sector: str = "",
+    max_per: Optional[float] = None,
+    min_yield: Optional[float] = None,
+    include_failed: bool = False,
+):
+    """Long-term fundamental screen. Thresholds themselves are NOT
+    overridable via query param -- see fundamentals/config.py's module
+    docstring for why (it would let you dial a stock into passing, which is
+    exactly what a multi-year screen exists to prevent). These params are
+    views over one fixed computation, not new scoring rules."""
+    try:
+        if not fundamentals_store.has_data():
+            return {"status": "error", "message": "No fundamentals snapshot yet -- run the refresh pipeline first"}
+        reports = await asyncio.to_thread(_scored_fundamentals)
+        universe_size = _fundamentals_cache.get("universe_size", len(reports))
+        filtered = fundamentals_screen.apply_filters(
+            reports, min_score=min_score, syariah_only=syariah_only, sector=sector,
+            max_per=max_per, min_yield=min_yield, include_failed=include_failed,
+        )
+        funnel = fundamentals_screen.build_funnel(reports, universe_size, reports)
+        passed = [r for r in reports if r.gates_passed]
+        insufficient = [r for r in reports if r.verdict == "DATA_KURANG"]
+        return {
+            "status": "success",
+            "data": {
+                "as_of": fundamentals_store.meta().get("as_of"),
+                "config_version": CONFIG_VERSION,
+                "funnel": funnel,
+                "counts": {
+                    "evaluated": len(reports), "passed": len(passed),
+                    "failed": len(reports) - len(passed), "insufficient_data": len(insufficient),
+                },
+                "groups": fundamentals_screen.group_by_sector(filtered),
+                "failed": fundamentals_screen.failed_summary(reports),
+            },
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@app.get("/api/fundamental/trend/{ticker}")
+async def fundamental_trend(ticker: str):
+    series = fundamentals_store.trend(ticker.upper())
+    if not series:
+        raise HTTPException(status_code=404, detail="No fundamental history for this ticker")
+    return {"status": "success", "data": series}
 
 
 if __name__ == "__main__":

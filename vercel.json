@@ -10,7 +10,16 @@
         },
         {
             "src": "api/index.py",
-            "use": "@vercel/python"
+            "use": "@vercel/python",
+            "config": {
+                "includeFiles": [
+                    "data/snapshots/**",
+                    "data/by_ticker/**",
+                    "data/statements/**",
+                    "data/_meta/**",
+                    "data/universe/aliases.json"
+                ]
+            }
         }
     ],
     "routes": [
