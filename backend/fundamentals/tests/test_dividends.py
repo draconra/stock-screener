@@ -47,3 +47,33 @@ def test_payout_bands():
     assert _payout_band(50.0) == "healthy"
     assert _payout_band(95.0) == "stretched"
     assert _payout_band(120.0) == "unsustainable"
+
+
+def test_history_is_ascending_by_calendar_payment_year_capped_at_10():
+    """`history` was serialized end-to-end (models.py -> API response) but
+    never itself asserted. Locks the shape the frontend now renders:
+    {year, dps} ascending, at most the 10 most recent years. Payments are
+    bucketed by the CALENDAR YEAR THEY WERE PAID, not fiscal year -- an
+    issuer with interim+final dividends can have multiple payments land in
+    the same year (measured on BBCA/TLKM real data: current in-progress
+    year already has multiple entries before the year is over)."""
+    # 12 years of two payments each -- more than the 10-year cap, and two
+    # entries per calendar year to reproduce interim+final bucketing.
+    history_in = []
+    for y in range(2013, 2025):
+        history_in.append({"date": f"{y}-03-01", "amount": 10.0})
+        history_in.append({"date": f"{y}-09-01", "amount": 5.0})
+    result = analyze(div_history=history_in, price=1000.0, eps_ttm=50.0, info_dividend_yield=None, today=date(2026, 9, 22))
+    hist = result["history"]
+
+    assert len(hist) == 10  # capped, not all 12 years
+    years = [h["year"] for h in hist]
+    assert years == sorted(years)  # ascending
+    assert years[0] == 2015 and years[-1] == 2024  # most recent 10 kept
+    # both payments in a year are summed into one bucket, not overwritten
+    assert hist[-1]["dps"] == 15.0
+
+
+def test_history_empty_when_no_dividends():
+    result = analyze(div_history=[], price=1000.0, eps_ttm=50.0, info_dividend_yield=None)
+    assert result["history"] == []

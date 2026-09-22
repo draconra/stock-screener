@@ -1208,8 +1208,15 @@ body {
     border-bottom: 1px solid #1c2128;
 }
 
+/* Scoped to .fund-detail's own padding/spacing only -- .chart-panel itself
+   (shared with the Screener tab's ForecastCard/TVChart) is deliberately
+   left untouched so this fix doesn't change anything outside Investasi. */
 .fund-detail {
-    padding: 4px 2px;
+    padding: 18px 20px;
+}
+
+.detail-section {
+    margin-top: 22px;
 }
 
 .detail-section-title {
@@ -1217,9 +1224,39 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: #6e7681;
-    margin-bottom: 6px;
-    padding-bottom: 4px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
     border-bottom: 1px solid #21262d;
+}
+
+.detail-subtitle {
+    font-size: 0.7rem;
+    color: #8b949e;
+    margin-bottom: 8px;
+}
+
+.dividend-year-table {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dividend-year-row {
+    display: grid;
+    grid-template-columns: 44px 90px 1fr;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.76rem;
+    color: #c9d1d9;
+}
+
+.dividend-year-label {
+    color: #8b949e;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.dividend-year-amount {
+    font-family: 'JetBrains Mono', monospace;
 }
 
 .criteria-table {
@@ -1230,15 +1267,15 @@ body {
 .criteria-group-title {
     font-size: 0.68rem;
     color: #6e7681;
-    margin-top: 8px;
-    margin-bottom: 2px;
+    margin-top: 10px;
+    margin-bottom: 4px;
 }
 
 .criteria-row {
     display: grid;
     grid-template-columns: 16px 1fr auto;
-    gap: 8px;
-    padding: 4px 0;
+    gap: 10px;
+    padding: 7px 4px;
     border-bottom: 1px solid #1c2128;
     font-size: 0.75rem;
     color: #c9d1d9;
@@ -1257,5 +1294,133 @@ body {
 @media (max-width: 480px) {
     .fund-filters {
         gap: 10px;
+    }
+}
+
+/* ─── News tab: in-app split view ───────────────────────────────────────── */
+/* Self-contained inside NewsTab.tsx (not the shared .chart-panel slot --
+   News gets no sidebar from App.tsx). Same width/palette/border values as
+   .chart-panel so it reads as the same kind of surface elsewhere in the app. */
+
+.news-layout {
+    display: flex;
+    height: 100%;
+    gap: 0;
+}
+
+.news-list-pane {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.news-detail-pane {
+    width: 600px;
+    min-width: 480px;
+    background: #161b22;
+    border-left: 1px solid #30363d;
+    margin-left: 16px;
+    padding: 18px 20px;
+    overflow-y: auto;
+}
+
+.news-row {
+    padding: 10px 6px;
+    border-bottom: 1px solid #21262d;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.news-row:hover {
+    background: #161b22;
+}
+
+.news-row.active {
+    background: #1c2128;
+    border-left: 2px solid #1f6feb;
+    padding-left: 4px;
+}
+
+.news-detail-category {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.news-detail-title {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: #e6edf3;
+    margin: 0 0 10px 0;
+    font-weight: 600;
+}
+
+.news-detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    color: #8b949e;
+}
+
+.news-detail-sentiment {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.news-detail-open-btn {
+    margin-top: 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #1f6feb;
+    color: white;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    width: fit-content;
+}
+
+.news-detail-open-btn:hover {
+    background: #388bfd;
+}
+
+@media (max-width: 1024px) {
+    .news-layout {
+        flex-direction: column;
+    }
+
+    .news-detail-pane {
+        width: 100%;
+        min-width: 0;
+        margin-left: 0;
+        margin-top: 12px;
+        border-left: none;
+        border-top: 1px solid #30363d;
+        max-height: 50vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .news-detail-pane {
+        padding: 14px 16px;
+        max-height: 40vh;
+    }
+
+    .news-detail-title {
+        font-size: 0.95rem;
     }
 }
