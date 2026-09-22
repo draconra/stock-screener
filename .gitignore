@@ -8,3 +8,7 @@ venv/
 dist/
 build/
 firebase-debug.log
+
+# fundamentals pipeline scratch space -- never committed, see backend/fundamentals/writer.py
+data/_staging/
+
