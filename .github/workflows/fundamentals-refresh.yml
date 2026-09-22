@@ -45,7 +45,7 @@ jobs:
         with:
           token: ${{ secrets.DATA_PUSH_TOKEN }}
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.9"
           cache: pip
