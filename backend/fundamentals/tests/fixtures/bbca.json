@@ -1,0 +1,390 @@
+{
+  "dividends": [
+    {
+      "amount": 22.5,
+      "date": "2004-07-01"
+    },
+    {
+      "amount": 5.0,
+      "date": "2004-11-23"
+    },
+    {
+      "amount": 8.0,
+      "date": "2005-07-20"
+    },
+    {
+      "amount": 5.0,
+      "date": "2005-10-07"
+    },
+    {
+      "amount": 9.0,
+      "date": "2006-06-07"
+    },
+    {
+      "amount": 5.5,
+      "date": "2006-10-11"
+    },
+    {
+      "amount": 11.5,
+      "date": "2007-06-11"
+    },
+    {
+      "amount": 5.5,
+      "date": "2007-11-30"
+    },
+    {
+      "amount": 12.7,
+      "date": "2008-06-13"
+    },
+    {
+      "amount": 7.0,
+      "date": "2009-01-16"
+    },
+    {
+      "amount": 13.0,
+      "date": "2009-06-10"
+    },
+    {
+      "amount": 8.0,
+      "date": "2009-11-13"
+    },
+    {
+      "amount": 14.0,
+      "date": "2010-06-01"
+    },
+    {
+      "amount": 8.5,
+      "date": "2010-11-22"
+    },
+    {
+      "amount": 14.0,
+      "date": "2011-06-07"
+    },
+    {
+      "amount": 8.7,
+      "date": "2011-12-07"
+    },
+    {
+      "amount": 14.0,
+      "date": "2012-06-11"
+    },
+    {
+      "amount": 8.7,
+      "date": "2012-12-04"
+    },
+    {
+      "amount": 14.2,
+      "date": "2013-05-29"
+    },
+    {
+      "amount": 9.0,
+      "date": "2013-11-29"
+    },
+    {
+      "amount": 15.0,
+      "date": "2014-04-30"
+    },
+    {
+      "amount": 10.0,
+      "date": "2014-12-05"
+    },
+    {
+      "amount": 19.6,
+      "date": "2015-04-17"
+    },
+    {
+      "amount": 11.0,
+      "date": "2015-11-13"
+    },
+    {
+      "amount": 21.0,
+      "date": "2016-04-15"
+    },
+    {
+      "amount": 14.0,
+      "date": "2016-12-01"
+    },
+    {
+      "amount": 26.0,
+      "date": "2017-04-17"
+    },
+    {
+      "amount": 16.0,
+      "date": "2017-11-29"
+    },
+    {
+      "amount": 35.0,
+      "date": "2018-04-13"
+    },
+    {
+      "amount": 17.0,
+      "date": "2018-12-03"
+    },
+    {
+      "amount": 51.0,
+      "date": "2019-04-24"
+    },
+    {
+      "amount": 20.0,
+      "date": "2019-12-06"
+    },
+    {
+      "amount": 91.0,
+      "date": "2020-04-21"
+    },
+    {
+      "amount": 19.6,
+      "date": "2020-12-08"
+    },
+    {
+      "amount": 86.4,
+      "date": "2021-04-08"
+    },
+    {
+      "amount": 25.0,
+      "date": "2021-11-17"
+    },
+    {
+      "amount": 120.0,
+      "date": "2022-03-28"
+    },
+    {
+      "amount": 35.0,
+      "date": "2022-12-02"
+    },
+    {
+      "amount": 170.0,
+      "date": "2023-03-29"
+    },
+    {
+      "amount": 42.5,
+      "date": "2023-12-04"
+    },
+    {
+      "amount": 227.5,
+      "date": "2024-03-25"
+    },
+    {
+      "amount": 50.0,
+      "date": "2024-11-21"
+    },
+    {
+      "amount": 250.0,
+      "date": "2025-03-21"
+    },
+    {
+      "amount": 55.0,
+      "date": "2025-12-03"
+    },
+    {
+      "amount": 281.0,
+      "date": "2026-03-30"
+    },
+    {
+      "amount": 20.0,
+      "date": "2026-06-17"
+    },
+    {
+      "amount": 25.0,
+      "date": "2026-08-31"
+    }
+  ],
+  "info": {
+    "52WeekChange": -0.2095238,
+    "SandP52WeekChange": 0.16641033,
+    "address1": "Menara BCA, Grand Indonesia",
+    "address2": "Jl. M.H. Thamrin No. 1",
+    "allTimeHigh": 10950.0,
+    "allTimeLow": 175.0,
+    "ask": 6225.0,
+    "askSize": 0,
+    "averageAnalystRating": "1.3 - Strong Buy",
+    "averageDailyVolume10Day": 138050720,
+    "averageDailyVolume3Month": 140823114,
+    "averageVolume": 140823114,
+    "averageVolume10days": 138050720,
+    "beta": -0.043,
+    "bid": 6200.0,
+    "bidSize": 0,
+    "bookValue": 2201.512,
+    "city": "Jakarta",
+    "country": "Indonesia",
+    "cryptoTradeable": false,
+    "currency": "IDR",
+    "currentPrice": 6200.0,
+    "customPriceAlertConfidence": "LOW",
+    "dayHigh": 6250.0,
+    "dayLow": 6200.0,
+    "dividendRate": 381.0,
+    "dividendYield": 6.12,
+    "earningsGrowth": 0.004,
+    "earningsQuarterlyGrowth": -0.001,
+    "earningsTimestamp": 1785230100,
+    "earningsTimestampEnd": 1792487700,
+    "earningsTimestampStart": 1792487700,
+    "ebitdaMargins": 0.0,
+    "enterpriseToRevenue": 6.761,
+    "enterpriseValue": 738922816602112,
+    "epsCurrentYear": 488.8092,
+    "epsForward": 482.48,
+    "epsTrailingTwelveMonths": 471.86,
+    "esgPopulated": false,
+    "exDividendDate": 1788134400,
+    "exchange": "JKT",
+    "exchangeDataDelayedBy": 10,
+    "exchangeTimezoneName": "Asia/Jakarta",
+    "exchangeTimezoneShortName": "WIB",
+    "fax": "62 21 2358 8343",
+    "fiftyDayAverage": 6393.5,
+    "fiftyDayAverageChange": -193.5,
+    "fiftyDayAverageChangePercent": -0.030265113,
+    "fiftyTwoWeekChangePercent": -20.95238,
+    "fiftyTwoWeekHigh": 8750.0,
+    "fiftyTwoWeekHighChange": -2550.0,
+    "fiftyTwoWeekHighChangePercent": -0.29142857,
+    "fiftyTwoWeekLow": 4820.0,
+    "fiftyTwoWeekLowChange": 1380.0,
+    "fiftyTwoWeekLowChangePercent": 0.28630707,
+    "fiftyTwoWeekRange": "4820.0 - 8750.0",
+    "financialCurrency": "IDR",
+    "firstTradeDateMilliseconds": 1086660000000,
+    "fiveYearAvgDividendYield": 2.83,
+    "floatShares": 48199417958,
+    "forwardEps": 482.48,
+    "forwardPE": 12.850273,
+    "fullExchangeName": "Jakarta",
+    "fullTimeEmployees": 27728,
+    "fulldayChange": -25.0,
+    "fulldayChangePercent": -0.40160644,
+    "fulldayPrice": 6200.0,
+    "gmtOffSetMilliseconds": 25200000,
+    "grossMargins": 0.0,
+    "grossProfits": 107063141203968,
+    "hasPrePostMarketData": false,
+    "heldPercentInsiders": 0.60814,
+    "heldPercentInstitutions": 0.18997,
+    "impliedSharesOutstanding": 122841751300,
+    "industry": "Banks - Regional",
+    "industryDisp": "Banks - Regional",
+    "industryKey": "banks-regional",
+    "irWebsite": "http://www.bca.co.id/en/about/hubungan-investor/laporan-tahunan/laporan_tahunan_landing.jsp",
+    "isEarningsDateEstimate": true,
+    "language": "en-US",
+    "lastDividendDate": 1788134400,
+    "lastDividendValue": 25.0,
+    "lastFiscalYearEnd": 1767139200,
+    "lastSplitDate": 1634083200,
+    "lastSplitFactor": "5:1",
+    "longBusinessSummary": "PT Bank Central Asia Tbk provides commercial banking and other financial services. The company offers time deposits, e- deposits, spinning, Dana Lander accounts, customer accounts, gold stage; loans, such as business, investment credit, securities collateral, multipurpose business, trade finance, business place loans; credit cards; and investment, including mutual funds, and bond and secondary SBN. The company also provides collection account opening, remittance, trade finance, tresuries and custodians, transaction banking, electronic banking, cash management, bank assurance, credit facilities, bank guarantees, export-import facilities, and foreign exchange facilities. In addition, the company offers investment financing, working capital financing, multipurpose financing, operating leases, and other financing activities; Sharia banking; securities brokerage dealer and underwriter for issuance of securities; general or loss insurance; life insurance; and venture capital services. PT Bank Central Asia Tbk was founded in 1955 and is headquartered in Jakarta, Indonesia. PT Bank Central Asia Tbk is a subsidiary of PT Dwimuria Investama Andalan.",
+    "longName": "PT Bank Central Asia Tbk",
+    "market": "id_market",
+    "marketCap": 761618833080320,
+    "marketState": "REGULAR",
+    "maxAge": 86400,
+    "messageBoardId": "finmb_1945186",
+    "mostRecentQuarter": 1782777600,
+    "netIncomeToCommon": 58055320403968,
+    "nextFiscalYearEnd": 1798675200,
+    "nonDilutedMarketCap": 764689901842500,
+    "numberOfAnalystOpinions": 25,
+    "open": 6225.0,
+    "operatingCashflow": -21951307317248,
+    "operatingMargins": 0.66751,
+    "payoutRatio": 0.7542,
+    "pegRatio": 1.56,
+    "phone": "62 21 2358 8000",
+    "previousClose": 6225.0,
+    "priceEpsCurrentYear": 12.683886,
+    "priceHint": 2,
+    "priceToBook": 2.8162463,
+    "priceToSalesTrailing12Months": 6.9684577,
+    "profitMargins": 0.53118,
+    "quoteSourceName": "Delayed Quote",
+    "quoteType": "EQUITY",
+    "recommendationKey": "strong_buy",
+    "recommendationMean": 1.30769,
+    "region": "US",
+    "regularMarketChange": -25.0,
+    "regularMarketChangePercent": -0.40160644,
+    "regularMarketDayHigh": 6250.0,
+    "regularMarketDayLow": 6200.0,
+    "regularMarketDayRange": "6200.0 - 6250.0",
+    "regularMarketOpen": 6225.0,
+    "regularMarketPreviousClose": 6225.0,
+    "regularMarketPrice": 6200.0,
+    "regularMarketTime": 1790047326,
+    "regularMarketVolume": 35163800,
+    "returnOnAssets": 0.03671,
+    "returnOnEquity": 0.21818,
+    "revenueGrowth": 0.025,
+    "revenuePerShare": 888.227,
+    "sector": "Financial Services",
+    "sectorDisp": "Financial Services",
+    "sectorKey": "financial-services",
+    "sharesOutstanding": 122841751300,
+    "shortName": "Bank Central Asia Tbk",
+    "sourceInterval": 10,
+    "symbol": "BBCA.JK",
+    "targetHighPrice": 10100.0,
+    "targetLowPrice": 6000.0,
+    "targetMeanPrice": 8210.04,
+    "targetMedianPrice": 8200.0,
+    "totalCash": 78018609414144,
+    "totalCashPerShare": 635.115,
+    "totalDebt": 52021302394880,
+    "totalRevenue": 109295182020608,
+    "tradeable": false,
+    "trailingAnnualDividendRate": 281.0,
+    "trailingAnnualDividendYield": 0.04514056,
+    "trailingEps": 471.86,
+    "trailingPE": 13.139491,
+    "trailingPegRatio": 1.5593,
+    "triggerable": false,
+    "twoHundredDayAverage": 6750.875,
+    "twoHundredDayAverageChange": -550.875,
+    "twoHundredDayAverageChangePercent": -0.08160053,
+    "typeDisp": "Equity",
+    "volume": 35163800,
+    "website": "https://www.bca.co.id",
+    "zip": "10310"
+  },
+  "statements": {
+    "net_income": {
+      "2022-12-31": 40735722000000.0,
+      "2023-12-31": 48639122000000.0,
+      "2024-12-31": 54836305000000.0,
+      "2025-12-31": 57537287000000.0
+    },
+    "ocf": {
+      "2022-12-31": 33779263000000.0,
+      "2023-12-31": 58063775000000.0,
+      "2024-12-31": 53820229000000.0,
+      "2025-12-31": 77508785000000.0
+    },
+    "revenue": {
+      "2022-12-31": 89523508000000.0,
+      "2023-12-31": 100485975000000.0,
+      "2024-12-31": 108796625000000.0,
+      "2025-12-31": 114319648000000.0
+    },
+    "shares_outstanding": {
+      "2022-12-31": 123275050000.0,
+      "2023-12-31": 123275050000.0,
+      "2024-12-31": 123275050000.0,
+      "2025-12-31": 123013033200.0
+    },
+    "total_assets": {
+      "2022-12-31": 1314731674000000.0,
+      "2023-12-31": 1408107010000000.0,
+      "2024-12-31": 1449301328000000.0,
+      "2025-12-31": 1586828536000000.0
+    },
+    "total_equity": {
+      "2022-12-31": 221018606000000.0,
+      "2023-12-31": 242356256000000.0,
+      "2024-12-31": 262640621000000.0,
+      "2025-12-31": 281466478000000.0
+    }
+  },
+  "ticker": "BBCA"
+}

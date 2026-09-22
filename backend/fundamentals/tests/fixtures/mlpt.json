@@ -1,0 +1,258 @@
+{
+  "dividends": [
+    {
+      "amount": 0.064,
+      "date": "2014-05-06"
+    },
+    {
+      "amount": 0.2284,
+      "date": "2015-06-05"
+    },
+    {
+      "amount": 0.28,
+      "date": "2016-04-08"
+    },
+    {
+      "amount": 1.26,
+      "date": "2017-05-08"
+    },
+    {
+      "amount": 1.2,
+      "date": "2018-05-08"
+    },
+    {
+      "amount": 1.7,
+      "date": "2019-05-08"
+    },
+    {
+      "amount": 5.32,
+      "date": "2020-06-11"
+    },
+    {
+      "amount": 4.6,
+      "date": "2021-05-11"
+    },
+    {
+      "amount": 3.6,
+      "date": "2022-01-12"
+    },
+    {
+      "amount": 1.8,
+      "date": "2022-05-23"
+    },
+    {
+      "amount": 6.2,
+      "date": "2022-09-15"
+    },
+    {
+      "amount": 7.24,
+      "date": "2023-05-05"
+    },
+    {
+      "amount": 4.28,
+      "date": "2024-05-07"
+    },
+    {
+      "amount": 4.4,
+      "date": "2024-08-22"
+    },
+    {
+      "amount": 3.44,
+      "date": "2025-05-15"
+    },
+    {
+      "amount": 2.14,
+      "date": "2025-11-07"
+    },
+    {
+      "amount": 3.2,
+      "date": "2026-05-11"
+    }
+  ],
+  "info": {
+    "52WeekChange": -0.81316584,
+    "SandP52WeekChange": 0.16641033,
+    "address1": "Sopo Del Office Tower & Lifestyle TowerB",
+    "address2": "18th Floor Jl. Mega Kuningan Barat III, Lot 10, 1-6 Kawasan Mega Kuningan",
+    "allTimeHigh": 10315.0,
+    "allTimeLow": 11.04,
+    "ask": 1150.0,
+    "askSize": 0,
+    "averageDailyVolume10Day": 2674970,
+    "averageDailyVolume3Month": 6684226,
+    "averageVolume": 6684226,
+    "averageVolume10days": 2674970,
+    "beta": 0.909,
+    "bid": 1145.0,
+    "bidSize": 0,
+    "bookValue": 15.822,
+    "city": "Jakarta",
+    "country": "Indonesia",
+    "cryptoTradeable": false,
+    "currency": "IDR",
+    "currentPrice": 1145.0,
+    "currentRatio": 1.03,
+    "customPriceAlertConfidence": "LOW",
+    "dayHigh": 1200.0,
+    "dayLow": 1145.0,
+    "debtToEquity": 28.71,
+    "dividendRate": 5.34,
+    "dividendYield": 0.45,
+    "earningsGrowth": 1.631,
+    "earningsQuarterlyGrowth": 1.631,
+    "ebitda": 616625012736,
+    "ebitdaMargins": 0.15698,
+    "enterpriseToEbitda": 88.796,
+    "enterpriseToRevenue": 13.939,
+    "enterpriseValue": 54753895645184,
+    "epsTrailingTwelveMonths": 8.11,
+    "esgPopulated": false,
+    "exDividendDate": 1778457600,
+    "exchange": "JKT",
+    "exchangeDataDelayedBy": 10,
+    "exchangeTimezoneName": "Asia/Jakarta",
+    "exchangeTimezoneShortName": "WIB",
+    "fax": "62 21 546 0020",
+    "fiftyDayAverage": 1335.9,
+    "fiftyDayAverageChange": -190.90002,
+    "fiftyDayAverageChangePercent": -0.14289993,
+    "fiftyTwoWeekChangePercent": -81.31658,
+    "fiftyTwoWeekHigh": 10315.0,
+    "fiftyTwoWeekHighChange": -9170.0,
+    "fiftyTwoWeekHighChangePercent": -0.8889966,
+    "fiftyTwoWeekLow": 480.0,
+    "fiftyTwoWeekLowChange": 665.0,
+    "fiftyTwoWeekLowChangePercent": 1.3854166,
+    "fiftyTwoWeekRange": "480.0 - 10315.0",
+    "financialCurrency": "IDR",
+    "firstTradeDateMilliseconds": 1373248800000,
+    "fiveYearAvgDividendYield": 5.76,
+    "floatShares": 7050000000,
+    "freeCashflow": 496413114368,
+    "fullExchangeName": "Jakarta",
+    "fullTimeEmployees": 939,
+    "fulldayChange": -30.0,
+    "fulldayChangePercent": -2.542373,
+    "fulldayPrice": 1145.0,
+    "gmtOffSetMilliseconds": 25200000,
+    "grossMargins": 0.16497,
+    "grossProfits": 648015970304,
+    "hasPrePostMarketData": false,
+    "heldPercentInsiders": 0.8496,
+    "heldPercentInstitutions": 0.0,
+    "impliedSharesOutstanding": 46875000000,
+    "industry": "Information Technology Services",
+    "industryDisp": "Information Technology Services",
+    "industryKey": "information-technology-services",
+    "language": "en-US",
+    "lastDividendDate": 1778457600,
+    "lastDividendValue": 3.2,
+    "lastFiscalYearEnd": 1767139200,
+    "lastSplitDate": 1784592000,
+    "lastSplitFactor": "25:1",
+    "longBusinessSummary": "PT Multipolar Technology Tbk provides consultation, integration, and information technology management services in Indonesia. The company offers security platforms and services, including application, network, data, user, managed security services, and eKYC; digital insights comprising data management, artificial intelligence, big data and analytics, business performance analytics services, credit scoring API, billing payment dashboard, and fraud detection and campaign systems; and hybrid infrastructure platforms and services that include server, storage, network, hyperconverged, PC and laptops, ATM and self-service devices, cloud infrastructure, OS and virtualization services, and hybrid cloud managed services. It also provides business solution platforms and services, such as banking solutions, smart office, enterprise project, IT services management, enterprise resource planning, system development life cycle and testing management, e-channel, mobile banking platform, supply chain financing, banking as a service, SME application and platform, and insurance claim management services, as well as branch IT, field operations, and payment, contact center managed services. In addition, the company offers digital platforms and services, including API management and service-oriented architecture, application development platform, database platform, enterprise application platform, banking integration, cloud platform, and IoT services. It serves the banking, insurance, multi-finance, securities, fintech, telecommunication, public sector, healthcare, education, oil and gas, retail, and manufacturing sectors. The company was founded in 1975 and is headquartered in Jakarta, Indonesia. PT Multipolar Technology Tbk operates as a subsidiary of PT Multipolar Tbk.",
+    "longName": "PT Multipolar Technology Tbk",
+    "market": "id_market",
+    "marketCap": 53671874265088,
+    "marketState": "REGULAR",
+    "maxAge": 86400,
+    "messageBoardId": "finmb_128470415",
+    "mostRecentQuarter": 1782777600,
+    "netIncomeToCommon": 369609015296,
+    "nextFiscalYearEnd": 1798675200,
+    "nonDilutedMarketCap": 57187500000000,
+    "open": 1200.0,
+    "operatingCashflow": 616234024960,
+    "operatingMargins": 0.08636,
+    "payoutRatio": 0.65440005,
+    "phone": "62 21 546 0011",
+    "previousClose": 1175.0,
+    "priceHint": 2,
+    "priceToBook": 72.36759,
+    "priceToSalesTrailing12Months": 13.663561,
+    "profitMargins": 0.09409001,
+    "quickRatio": 0.47,
+    "quoteSourceName": "Delayed Quote",
+    "quoteType": "EQUITY",
+    "recommendationKey": "none",
+    "region": "US",
+    "regularMarketChange": -30.0,
+    "regularMarketChangePercent": -2.542373,
+    "regularMarketDayHigh": 1200.0,
+    "regularMarketDayLow": 1145.0,
+    "regularMarketDayRange": "1145.0 - 1200.0",
+    "regularMarketOpen": 1200.0,
+    "regularMarketPreviousClose": 1175.0,
+    "regularMarketPrice": 1145.0,
+    "regularMarketTime": 1790047233,
+    "regularMarketVolume": 363300,
+    "returnOnAssets": 0.06787,
+    "returnOnEquity": 0.53878,
+    "revenueGrowth": 0.043,
+    "revenuePerShare": 83.8,
+    "sector": "Technology",
+    "sectorDisp": "Technology",
+    "sectorKey": "technology",
+    "sharesOutstanding": 46875000000,
+    "shortName": "Multipolar Technology Tbk.",
+    "sourceInterval": 10,
+    "symbol": "MLPT.JK",
+    "totalCash": 542515003392,
+    "totalCashPerShare": 11.574,
+    "totalDebt": 214118006784,
+    "totalRevenue": 3928103059456,
+    "tradeable": false,
+    "trailingAnnualDividendRate": 3.2,
+    "trailingAnnualDividendYield": 0.0027234042,
+    "trailingEps": 8.11,
+    "trailingPE": 141.18373,
+    "trailingPegRatio": null,
+    "triggerable": false,
+    "twoHundredDayAverage": 1277.615,
+    "twoHundredDayAverageChange": -132.61499,
+    "twoHundredDayAverageChangePercent": -0.103798866,
+    "typeDisp": "Equity",
+    "volume": 363300,
+    "website": "https://www.multipolar.com",
+    "zip": "12950"
+  },
+  "statements": {
+    "net_income": {
+      "2022-12-31": 559004000000.0,
+      "2023-12-31": 224435000000.0,
+      "2024-12-31": 368880000000.0,
+      "2025-12-31": 336492000000.0
+    },
+    "ocf": {
+      "2022-12-31": 111939000000.0,
+      "2023-12-31": 564881000000.0,
+      "2024-12-31": 402203000000.0,
+      "2025-12-31": 671680000000.0
+    },
+    "revenue": {
+      "2022-12-31": 3442223000000.0,
+      "2023-12-31": 3297221000000.0,
+      "2024-12-31": 3729786000000.0,
+      "2025-12-31": 3838885000000.0
+    },
+    "shares_outstanding": {
+      "2022-12-31": 46875000000.0,
+      "2023-12-31": 46875000000.0,
+      "2024-12-31": 46875000000.0,
+      "2025-12-31": 46875000000.0
+    },
+    "total_assets": {
+      "2022-12-31": 2720784000000.0,
+      "2023-12-31": 3121609000000.0,
+      "2024-12-31": 3307160000000.0,
+      "2025-12-31": 3745672000000.0
+    },
+    "total_equity": {
+      "2022-12-31": 827049000000.0,
+      "2023-12-31": 716352000000.0,
+      "2024-12-31": 678012000000.0,
+      "2025-12-31": 757229000000.0
+    }
+  },
+  "ticker": "MLPT"
+}

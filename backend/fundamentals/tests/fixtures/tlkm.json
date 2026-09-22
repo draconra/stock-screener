@@ -1,0 +1,326 @@
+{
+  "dividends": [
+    {
+      "amount": 1.4224,
+      "date": "2004-12-27"
+    },
+    {
+      "amount": 28.980398,
+      "date": "2005-07-18"
+    },
+    {
+      "amount": 43.7622,
+      "date": "2006-07-24"
+    },
+    {
+      "amount": 9.69,
+      "date": "2006-12-22"
+    },
+    {
+      "amount": 50.951,
+      "date": "2007-07-23"
+    },
+    {
+      "amount": 9.69,
+      "date": "2007-11-30"
+    },
+    {
+      "amount": 61.918324,
+      "date": "2008-07-14"
+    },
+    {
+      "amount": 19.59928,
+      "date": "2008-10-10"
+    },
+    {
+      "amount": 59.388702,
+      "date": "2009-07-07"
+    },
+    {
+      "amount": 5.33,
+      "date": "2009-12-10"
+    },
+    {
+      "amount": 52.28298,
+      "date": "2010-07-08"
+    },
+    {
+      "amount": 5.35,
+      "date": "2010-12-23"
+    },
+    {
+      "amount": 59.22592,
+      "date": "2011-06-14"
+    },
+    {
+      "amount": 74.2686,
+      "date": "2012-06-06"
+    },
+    {
+      "amount": 87.2376,
+      "date": "2013-05-30"
+    },
+    {
+      "amount": 102.401,
+      "date": "2014-04-29"
+    },
+    {
+      "amount": 89.46,
+      "date": "2015-04-27"
+    },
+    {
+      "amount": 94.637,
+      "date": "2016-05-02"
+    },
+    {
+      "amount": 19.379,
+      "date": "2016-12-15"
+    },
+    {
+      "amount": 117.3675,
+      "date": "2017-05-03"
+    },
+    {
+      "amount": 167.6598,
+      "date": "2018-05-08"
+    },
+    {
+      "amount": 163.8225,
+      "date": "2019-06-12"
+    },
+    {
+      "amount": 154.0682,
+      "date": "2020-06-30"
+    },
+    {
+      "amount": 168.01,
+      "date": "2021-06-09"
+    },
+    {
+      "amount": 149.9656,
+      "date": "2022-06-08"
+    },
+    {
+      "amount": 167.5987,
+      "date": "2023-06-12"
+    },
+    {
+      "amount": 178.50418,
+      "date": "2024-05-16"
+    },
+    {
+      "amount": 212.4665,
+      "date": "2025-06-11"
+    },
+    {
+      "amount": 223.16588,
+      "date": "2026-06-18"
+    }
+  ],
+  "info": {
+    "52WeekChange": -0.21630096,
+    "SandP52WeekChange": 0.16641033,
+    "address1": "Jl. Japati No. 1",
+    "allTimeHigh": 4850.0,
+    "allTimeLow": 810.0,
+    "ask": 2480.0,
+    "askSize": 0,
+    "averageAnalystRating": "1.4 - Strong Buy",
+    "averageDailyVolume10Day": 119979330,
+    "averageDailyVolume3Month": 107818396,
+    "averageVolume": 107818396,
+    "averageVolume10days": 119979330,
+    "beta": 0.11,
+    "bid": 2470.0,
+    "bidSize": 0,
+    "bookValue": 1200.364,
+    "city": "Bandung",
+    "compensationAsOfEpochDate": 1767139200,
+    "country": "Indonesia",
+    "cryptoTradeable": false,
+    "currency": "IDR",
+    "currentPrice": 2480.0,
+    "currentRatio": 0.791,
+    "customPriceAlertConfidence": "LOW",
+    "dayHigh": 2540.0,
+    "dayLow": 2470.0,
+    "debtToEquity": 59.982,
+    "dividendRate": 223.17,
+    "dividendYield": 8.93,
+    "earningsCallTimestampEnd": 1785748500,
+    "earningsCallTimestampStart": 1785748500,
+    "earningsGrowth": 0.28,
+    "earningsQuarterlyGrowth": 0.275,
+    "earningsTimestamp": 1785489300,
+    "earningsTimestampEnd": 1793265300,
+    "earningsTimestampStart": 1793265300,
+    "ebitda": 64076000526336,
+    "ebitdaMargins": 0.42826998,
+    "enterpriseToEbitda": 4.485,
+    "enterpriseToRevenue": 1.921,
+    "enterpriseValue": 287369349562368,
+    "epsCurrentYear": 202.7133,
+    "epsForward": 261.11,
+    "epsTrailingTwelveMonths": 174.0,
+    "esgPopulated": false,
+    "exDividendDate": 1781740800,
+    "exchange": "JKT",
+    "exchangeDataDelayedBy": 10,
+    "exchangeTimezoneName": "Asia/Jakarta",
+    "exchangeTimezoneShortName": "WIB",
+    "fax": "62 22 720 6757",
+    "fiftyDayAverage": 2623.2,
+    "fiftyDayAverageChange": -143.19995,
+    "fiftyDayAverageChangePercent": -0.054589797,
+    "fiftyTwoWeekChangePercent": -21.630096,
+    "fiftyTwoWeekHigh": 3990.0,
+    "fiftyTwoWeekHighChange": -1510.0,
+    "fiftyTwoWeekHighChangePercent": -0.3784461,
+    "fiftyTwoWeekLow": 2350.0,
+    "fiftyTwoWeekLowChange": 130.0,
+    "fiftyTwoWeekLowChangePercent": 0.05531915,
+    "fiftyTwoWeekRange": "2350.0 - 3990.0",
+    "financialCurrency": "IDR",
+    "firstTradeDateMilliseconds": 1096336800000,
+    "fiveYearAvgDividendYield": 5.36,
+    "floatShares": 46453310924,
+    "forwardEps": 261.11,
+    "forwardPE": 9.497913,
+    "freeCashflow": 57332373389312,
+    "fullExchangeName": "Jakarta",
+    "fullTimeEmployees": 17438,
+    "fulldayChange": -20.0,
+    "fulldayChangePercent": -0.8032129,
+    "fulldayPrice": 2480.0,
+    "gmtOffSetMilliseconds": 25200000,
+    "grossMargins": 0.59959,
+    "grossProfits": 89708998688768,
+    "hasPrePostMarketData": false,
+    "heldPercentInsiders": 0.55438,
+    "heldPercentInstitutions": 0.21375999,
+    "impliedSharesOutstanding": 98580940800,
+    "industry": "Telecom Services",
+    "industryDisp": "Telecom Services",
+    "industryKey": "telecom-services",
+    "irWebsite": "http://www.telkom.co.id/investor-relation/",
+    "isEarningsDateEstimate": false,
+    "language": "en-US",
+    "lastDividendDate": 1781740800,
+    "lastDividendValue": 223.16588,
+    "lastFiscalYearEnd": 1767139200,
+    "lastSplitDate": 1377648000,
+    "lastSplitFactor": "5:1",
+    "longBusinessSummary": "Perusahaan Perseroan (Persero) PT Telekomunikasi Indonesia Tbk provides information and communications technology, and telecommunications network services worldwide. The company operates through Mobile, Consumer, Enterprise, Wholesale and International Business, and Other segments. The Mobile segment offers mobile voice, SMS, mobile broadband, and value added services. The Consumer segment provides fixed wireline, pay TV, and internet services; and other telecommunication services to home customers. The Enterprise segment offers end-to-end solution to corporate and institutions. The Wholesale and International Business segment provides interconnection services, broadband access, information technology services, data, and internet services to other licensed operator and institutions. The Other segment offers digital content products, big data, business-to-business commerce, and financial services to individual and corporate customers. The company also engages in leasing of towers, and provision of digital support and other telecommunication services; provision of consultation service of hardware, software, data center, and internet exchange, as well as multimedia portal services; business management consulting; property development and management; trading service related to telecommunication, information, multimedia technology, entertainment, and investment services; and digital content exchange hub services. The company was founded in 1884 and is headquartered in Bandung, Indonesia. Perusahaan Perseroan (Persero) PT Telekomunikasi Indonesia Tbk operates as a subsidiary of PT Danantara Asset Management (Persero).",
+    "longName": "Perusahaan Perseroan (Persero) PT Telekomunikasi Indonesia Tbk",
+    "market": "id_market",
+    "marketCap": 244480728891392,
+    "marketState": "REGULAR",
+    "maxAge": 86400,
+    "messageBoardId": "finmb_400368",
+    "mostRecentQuarter": 1782777600,
+    "netIncomeToCommon": 17964000608256,
+    "nextFiscalYearEnd": 1798675200,
+    "nonDilutedMarketCap": 252367208448000,
+    "numberOfAnalystOpinions": 23,
+    "open": 2500.0,
+    "operatingCashflow": 66130999771136,
+    "operatingMargins": 0.28538,
+    "payoutRatio": 1.2516,
+    "pegRatio": 3.07,
+    "phone": "62 22 452 1404",
+    "previousClose": 2500.0,
+    "priceEpsCurrentYear": 12.234027,
+    "priceHint": 2,
+    "priceToBook": 2.06604,
+    "priceToSalesTrailing12Months": 1.6340547,
+    "profitMargins": 0.12007,
+    "quickRatio": 0.696,
+    "quoteSourceName": "Delayed Quote",
+    "quoteType": "EQUITY",
+    "recommendationKey": "strong_buy",
+    "recommendationMean": 1.41667,
+    "region": "US",
+    "regularMarketChange": -20.0,
+    "regularMarketChangePercent": -0.8032129,
+    "regularMarketDayHigh": 2540.0,
+    "regularMarketDayLow": 2470.0,
+    "regularMarketDayRange": "2470.0 - 2540.0",
+    "regularMarketOpen": 2500.0,
+    "regularMarketPreviousClose": 2500.0,
+    "regularMarketPrice": 2480.0,
+    "regularMarketTime": 1790047327,
+    "regularMarketVolume": 38459900,
+    "returnOnAssets": 0.07579,
+    "returnOnEquity": 0.17683001,
+    "revenueGrowth": 0.064,
+    "revenuePerShare": 1512.222,
+    "sector": "Communication Services",
+    "sectorDisp": "Communication Services",
+    "sectorKey": "communication-services",
+    "sharesOutstanding": 98580940799,
+    "shortName": "Telkom Indonesia (Persero) Tbk.",
+    "sourceInterval": 10,
+    "symbol": "TLKM.JK",
+    "targetHighPrice": 4150.0,
+    "targetLowPrice": 2300.0,
+    "targetMeanPrice": 3443.4783,
+    "targetMedianPrice": 3500.0,
+    "totalCash": 56483001663488,
+    "totalCashPerShare": 572.961,
+    "totalDebt": 80884996767744,
+    "totalRevenue": 149616007839744,
+    "tradeable": false,
+    "trailingAnnualDividendRate": 223.17,
+    "trailingAnnualDividendYield": 0.089268,
+    "trailingEps": 174.0,
+    "trailingPE": 14.252873,
+    "trailingPegRatio": 3.0668,
+    "triggerable": false,
+    "twoHundredDayAverage": 3026.4,
+    "twoHundredDayAverageChange": -546.3999,
+    "twoHundredDayAverageChangePercent": -0.18054451,
+    "typeDisp": "Equity",
+    "volume": 38459900,
+    "website": "https://www.telkom.co.id",
+    "zip": "40133"
+  },
+  "statements": {
+    "net_income": {
+      "2022-12-31": 20736000000000.0,
+      "2023-12-31": 23053000000000.0,
+      "2024-12-31": 22365000000000.0,
+      "2025-12-31": 17486000000000.0
+    },
+    "ocf": {
+      "2022-12-31": 73354000000000.0,
+      "2023-12-31": 60581000000000.0,
+      "2024-12-31": 61600000000000.0,
+      "2025-12-31": 63842000000000.0
+    },
+    "revenue": {
+      "2022-12-31": 147306000000000.0,
+      "2023-12-31": 149216000000000.0,
+      "2024-12-31": 149967000000000.0,
+      "2025-12-31": 146742000000000.0
+    },
+    "shares_outstanding": {
+      "2022-12-31": 99062216600.0,
+      "2023-12-31": 99062216600.0,
+      "2024-12-31": 99062216600.0,
+      "2025-12-31": 99053271200.0
+    },
+    "total_assets": {
+      "2022-12-31": 274817000000000.0,
+      "2023-12-31": 279552000000000.0,
+      "2024-12-31": 291011000000000.0,
+      "2025-12-31": 287280000000000.0
+    },
+    "total_equity": {
+      "2022-12-31": 129224000000000.0,
+      "2023-12-31": 128536000000000.0,
+      "2024-12-31": 133602000000000.0,
+      "2025-12-31": 130151000000000.0
+    }
+  },
+  "ticker": "TLKM"
+}

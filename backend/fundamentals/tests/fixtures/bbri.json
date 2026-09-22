@@ -1,0 +1,320 @@
+{
+  "dividends": [
+    {
+      "amount": 7.653504,
+      "date": "2004-07-07"
+    },
+    {
+      "amount": 13.902487,
+      "date": "2005-06-17"
+    },
+    {
+      "amount": 14.197936,
+      "date": "2006-06-22"
+    },
+    {
+      "amount": 15.730637,
+      "date": "2007-06-14"
+    },
+    {
+      "amount": 17.848782,
+      "date": "2008-06-19"
+    },
+    {
+      "amount": 15.377917,
+      "date": "2009-06-17"
+    },
+    {
+      "amount": 4.15811,
+      "date": "2009-12-01"
+    },
+    {
+      "amount": 12.007065,
+      "date": "2010-06-29"
+    },
+    {
+      "amount": 4.175382,
+      "date": "2010-12-20"
+    },
+    {
+      "amount": 12.734325,
+      "date": "2011-05-30"
+    },
+    {
+      "amount": 22.232658,
+      "date": "2012-04-27"
+    },
+    {
+      "amount": 40.950565,
+      "date": "2013-03-27"
+    },
+    {
+      "amount": 46.78594,
+      "date": "2014-04-29"
+    },
+    {
+      "amount": 53.599255,
+      "date": "2015-03-27"
+    },
+    {
+      "amount": 56.664707,
+      "date": "2016-04-01"
+    },
+    {
+      "amount": 77.926926,
+      "date": "2017-03-23"
+    },
+    {
+      "amount": 97.04093,
+      "date": "2018-04-02"
+    },
+    {
+      "amount": 120.15633,
+      "date": "2019-05-24"
+    },
+    {
+      "amount": 152.90845,
+      "date": "2020-02-27"
+    },
+    {
+      "amount": 89.91268,
+      "date": "2021-04-06"
+    },
+    {
+      "amount": 174.2515,
+      "date": "2022-03-11"
+    },
+    {
+      "amount": 57.0,
+      "date": "2023-01-10"
+    },
+    {
+      "amount": 231.22139,
+      "date": "2023-03-24"
+    },
+    {
+      "amount": 84.0,
+      "date": "2024-01-02"
+    },
+    {
+      "amount": 235.0,
+      "date": "2024-03-14"
+    },
+    {
+      "amount": 135.0,
+      "date": "2024-12-27"
+    },
+    {
+      "amount": 208.4,
+      "date": "2025-04-11"
+    },
+    {
+      "amount": 137.0,
+      "date": "2025-12-30"
+    },
+    {
+      "amount": 209.0,
+      "date": "2026-04-21"
+    }
+  ],
+  "info": {
+    "52WeekChange": -0.20289856,
+    "SandP52WeekChange": 0.16641033,
+    "address1": "Gedung BRI",
+    "address2": "Jalan Jenderal Sudirman Kav.44-46 Tromol Pos 1094/1000",
+    "allTimeHigh": 6450.0,
+    "allTimeLow": 86.362144,
+    "ask": 3210.0,
+    "askSize": 0,
+    "averageAnalystRating": "1.8 - Buy",
+    "averageDailyVolume10Day": 175012130,
+    "averageDailyVolume3Month": 219080871,
+    "averageVolume": 219080871,
+    "averageVolume10days": 175012130,
+    "beta": 0.178,
+    "bid": 3210.0,
+    "bidSize": 0,
+    "bookValue": 2136.41,
+    "city": "Jakarta",
+    "country": "Indonesia",
+    "cryptoTradeable": false,
+    "currency": "IDR",
+    "currentPrice": 3200.0,
+    "customPriceAlertConfidence": "LOW",
+    "dayHigh": 3270.0,
+    "dayLow": 3200.0,
+    "dividendRate": 418.0,
+    "dividendYield": 12.67,
+    "earningsCallTimestampEnd": 1777540500,
+    "earningsCallTimestampStart": 1777540500,
+    "earningsGrowth": 0.214,
+    "earningsQuarterlyGrowth": 0.215,
+    "earningsTimestamp": 1788167700,
+    "earningsTimestampEnd": 1793265300,
+    "earningsTimestampStart": 1793265300,
+    "ebitdaMargins": 0.0,
+    "enterpriseToRevenue": 4.902,
+    "enterpriseValue": 719750820790272,
+    "epsCurrentYear": 391.6764,
+    "epsForward": 440.19,
+    "epsTrailingTwelveMonths": 406.89,
+    "esgPopulated": false,
+    "exDividendDate": 1776729600,
+    "exchange": "JKT",
+    "exchangeDataDelayedBy": 10,
+    "exchangeTimezoneName": "Asia/Jakarta",
+    "exchangeTimezoneShortName": "WIB",
+    "fax": "62 21 250 0077",
+    "fiftyDayAverage": 3139.8,
+    "fiftyDayAverageChange": 60.19995,
+    "fiftyDayAverageChangePercent": 0.01917318,
+    "fiftyTwoWeekChangePercent": -20.289856,
+    "fiftyTwoWeekHigh": 4170.0,
+    "fiftyTwoWeekHighChange": -970.0,
+    "fiftyTwoWeekHighChangePercent": -0.2326139,
+    "fiftyTwoWeekLow": 2540.0,
+    "fiftyTwoWeekLowChange": 660.0,
+    "fiftyTwoWeekLowChangePercent": 0.25984251,
+    "fiftyTwoWeekRange": "2540.0 - 4170.0",
+    "financialCurrency": "IDR",
+    "firstTradeDateMilliseconds": 1068429600000,
+    "fiveYearAvgDividendYield": 6.49,
+    "floatShares": 69249932878,
+    "forwardEps": 440.19,
+    "forwardPE": 7.269588,
+    "fullExchangeName": "Jakarta",
+    "fullTimeEmployees": 82175,
+    "fulldayChange": -100.0,
+    "fulldayChangePercent": -3.030303,
+    "fulldayPrice": 3200.0,
+    "gmtOffSetMilliseconds": 25200000,
+    "grossMargins": 0.0,
+    "grossProfits": 144500013924352,
+    "hasPrePostMarketData": false,
+    "heldPercentInsiders": 0.56543,
+    "heldPercentInstitutions": 0.19263001,
+    "impliedSharesOutstanding": 150684189304,
+    "industry": "Banks - Regional",
+    "industryDisp": "Banks - Regional",
+    "industryKey": "banks-regional",
+    "irWebsite": "http://www.irbri.com/",
+    "isEarningsDateEstimate": true,
+    "language": "en-US",
+    "lastDividendDate": 1776729600,
+    "lastDividendValue": 209.0,
+    "lastFiscalYearEnd": 1767139200,
+    "lastSplitDate": 1510272000,
+    "lastSplitFactor": "5:1",
+    "longBusinessSummary": "PT Bank Rakyat Indonesia (Persero) Tbk provides various banking products and services in Indonesia and internationally. The company offers savings and current accounts; time, foreign currency time, and on-call deposits; mortgage, working capital, investment, franchise, and cash collateral loans, as well as supply and value chain financing and bank guarantees; and microphone, small and medium, and program loans. It also provides bill payment, deposit, online transaction, remittance, money transfer, business, financial, institutional, treasury and global, custodian, trustee, and cash management services. In addition, the company offers investment products and services; trade finance and services, and transaction banking services, including import and export, standby L/C, money changer, BRI RTE online system services, as well as letters of credit; credit cards; and wealth management, merchant, and digital banking services. Further, it provides life and general insurance, securities underwriting and brokerage, and venture capital services. PT Bank Rakyat Indonesia (Persero) Tbk was founded in 1895 and is headquartered in Jakarta, Indonesia. PT Bank Rakyat Indonesia (Persero) Tbk operates as a subsidiary of PT Danantara Asset Management (Persero).",
+    "longName": "PT Bank Rakyat Indonesia (Persero) Tbk",
+    "market": "id_market",
+    "marketCap": 482189401653248,
+    "marketState": "REGULAR",
+    "maxAge": 86400,
+    "messageBoardId": "finmb_8391292",
+    "mostRecentQuarter": 1782777600,
+    "netIncomeToCommon": 61241083035648,
+    "nextFiscalYearEnd": 1798675200,
+    "nonDilutedMarketCap": 498764666596240,
+    "numberOfAnalystOpinions": 23,
+    "open": 3260.0,
+    "operatingCashflow": -91542496739328,
+    "operatingMargins": 0.41943002,
+    "payoutRatio": 0.85010004,
+    "pegRatio": 1.28,
+    "phone": "62 21 251 0244",
+    "previousClose": 3300.0,
+    "priceEpsCurrentYear": 8.17001,
+    "priceHint": 2,
+    "priceToBook": 1.4978399,
+    "priceToSalesTrailing12Months": 3.2837138,
+    "profitMargins": 0.41705,
+    "quoteSourceName": "Delayed Quote",
+    "quoteType": "EQUITY",
+    "recommendationKey": "buy",
+    "recommendationMean": 1.83333,
+    "region": "US",
+    "regularMarketChange": -100.0,
+    "regularMarketChangePercent": -3.030303,
+    "regularMarketDayHigh": 3270.0,
+    "regularMarketDayLow": 3200.0,
+    "regularMarketDayRange": "3200.0 - 3270.0",
+    "regularMarketOpen": 3260.0,
+    "regularMarketPreviousClose": 3300.0,
+    "regularMarketPrice": 3200.0,
+    "regularMarketTime": 1790047328,
+    "regularMarketVolume": 77106700,
+    "returnOnAssets": 0.027709998,
+    "returnOnEquity": 0.18988001,
+    "revenueGrowth": 0.04,
+    "revenuePerShare": 975.06,
+    "sector": "Financial Services",
+    "sectorDisp": "Financial Services",
+    "sectorKey": "financial-services",
+    "sharesOutstanding": 149878079535,
+    "shortName": "Bank Rakyat Indonesia (Persero)",
+    "sourceInterval": 10,
+    "symbol": "BBRI.JK",
+    "targetHighPrice": 4900.0,
+    "targetLowPrice": 2860.0,
+    "targetMeanPrice": 3789.0435,
+    "targetMedianPrice": 3900.0,
+    "totalCash": 124656375824384,
+    "totalCashPerShare": 827.269,
+    "totalDebt": 340397700153344,
+    "totalRevenue": 146842700480512,
+    "tradeable": false,
+    "trailingAnnualDividendRate": 209.0,
+    "trailingAnnualDividendYield": 0.06333333,
+    "trailingEps": 406.89,
+    "trailingPE": 7.864533,
+    "trailingPegRatio": 1.2789,
+    "triggerable": false,
+    "twoHundredDayAverage": 3337.25,
+    "twoHundredDayAverageChange": -137.25,
+    "twoHundredDayAverageChangePercent": -0.041126676,
+    "typeDisp": "Equity",
+    "volume": 77106700,
+    "website": "https://bri.co.id",
+    "zip": "10210"
+  },
+  "statements": {
+    "net_income": {
+      "2022-12-31": 51170312000000.0,
+      "2023-12-31": 60099863000000.0,
+      "2024-12-31": 59944649000000.0,
+      "2025-12-31": 56652384000000.0
+    },
+    "ocf": {
+      "2022-12-31": 97506005000000.0,
+      "2023-12-31": -4971454000000.0,
+      "2024-12-31": 24283108000000.0,
+      "2025-12-31": 14617023000000.0
+    },
+    "revenue": {
+      "2022-12-31": 153783233000000.0,
+      "2023-12-31": 166453016000000.0,
+      "2024-12-31": 172996429000000.0,
+      "2025-12-31": 186876558000000.0
+    },
+    "shares_outstanding": {
+      "2022-12-31": 151070680004.0,
+      "2023-12-31": 150790856704.0,
+      "2024-12-31": 150649123304.0,
+      "2025-12-31": 151559001604.0
+    },
+    "total_assets": {
+      "2022-12-31": 1865639010000000.0,
+      "2023-12-31": 1965414954000000.0,
+      "2024-12-31": 1992186906000000.0,
+      "2025-12-31": 2135371105000000.0
+    },
+    "total_equity": {
+      "2022-12-31": 299294011000000.0,
+      "2023-12-31": 311465937000000.0,
+      "2024-12-31": 317028351000000.0,
+      "2025-12-31": 324033858000000.0
+    }
+  },
+  "ticker": "BBRI"
+}
