@@ -31,14 +31,74 @@ const SENTIMENT_LABEL: Record<string, string> = {
 
 const FILTERS = ['All', 'IHSG', 'IDX', 'Global', 'Commodity'];
 
-// Google News RSS (the only source backend/services/news.py has) does not
-// provide article body text -- its `summary` field is just the title
-// wrapped in an <a>, and `url` is a Google redirect link, not the
-// publisher's page. So this panel shows the metadata that actually exists
-// (title, source, category, sentiment, time) rather than pretending to be
-// an article reader. Opening the real article is one explicit button, not
-// the default click action on a row anymore.
+interface ArticleData {
+    text: string;
+    title: string | null;
+    author: string | null;
+    date: string | null;
+    site: string | null;
+    publisher_url: string;
+}
+
+// Friendly messages for the backend's short machine-readable failure
+// reasons (services/news_scraper.py) -- never show the raw code to the
+// user, and always keep the "buka artikel asli" path available since a
+// failure here just means "couldn't fetch it for you automatically."
+const FAILURE_MESSAGE: Record<string, string> = {
+    decode_failed: 'Tidak bisa menemukan URL asli dari link Google News ini.',
+    resolved_url_unsafe_or_missing: 'Tidak bisa menemukan URL asli dari link Google News ini.',
+    fetch_empty: 'Situs sumber tidak merespons.',
+    extract_too_short: 'Situs sumber kemungkinan berbayar atau memblokir pengambilan otomatis.',
+};
+const DEFAULT_FAILURE_MESSAGE = 'Tidak bisa memuat artikel penuh secara otomatis.';
+
+function failureMessage(reason: string): string {
+    if (FAILURE_MESSAGE[reason]) return FAILURE_MESSAGE[reason];
+    if (reason.startsWith('fetch_')) return 'Situs sumber tidak bisa diakses.';
+    if (reason.startsWith('extract_')) return 'Tidak bisa mengambil isi artikel dari situs sumber.';
+    return DEFAULT_FAILURE_MESSAGE;
+}
+
+// On-demand full-article fetch: scrapes ONE article, only when the user
+// picks it here -- never as part of the news list itself. See
+// backend/services/news_scraper.py's module docstring for why (resolves
+// the Google News redirect via googlenewsdecoder, then extracts the main
+// article text via trafilatura; nothing is scraped in bulk or persisted).
+// A failure here degrades to the metadata + external-link view that
+// existed before this feature -- it never blocks reading the article,
+// just skips the in-app convenience.
 const NewsDetail: React.FC<{ item: NewsItem | null }> = ({ item }) => {
+    const [article, setArticle] = useState<ArticleData | null>(null);
+    const [articleLoading, setArticleLoading] = useState(false);
+    const [articleError, setArticleError] = useState<string | null>(null);
+
+    useEffect(() => {
+        setArticle(null);
+        setArticleError(null);
+        if (!item) return;
+
+        let cancelled = false;
+        setArticleLoading(true);
+        fetch(`${API_BASE}/api/news/article?url=${encodeURIComponent(item.url)}`)
+            .then(res => res.json())
+            .then(result => {
+                if (cancelled) return;
+                if (result.status === 'success') {
+                    setArticle(result.data);
+                } else {
+                    setArticleError(failureMessage(result.reason || ''));
+                }
+            })
+            .catch(() => {
+                if (!cancelled) setArticleError(DEFAULT_FAILURE_MESSAGE);
+            })
+            .finally(() => {
+                if (!cancelled) setArticleLoading(false);
+            });
+
+        return () => { cancelled = true; };
+    }, [item]);
+
     if (!item) {
         return <div className="empty-state">Pilih berita di kiri untuk lihat detail.</div>;
     }
@@ -62,9 +122,37 @@ const NewsDetail: React.FC<{ item: NewsItem | null }> = ({ item }) => {
                 </div>
             </div>
 
-            <div className="detail-section" style={{ fontSize: '0.78rem', color: '#6e7681' }}>
-                Google News RSS hanya menyediakan judul dan sumber, bukan isi artikel penuh.
-                Untuk membaca lengkap, buka situs sumbernya.
+            <div className="detail-section">
+                {articleLoading && (
+                    <div className="news-article-status">Memuat artikel penuh…</div>
+                )}
+
+                {!articleLoading && article && (
+                    <>
+                        {(article.author || article.date) && (
+                            <div className="news-article-byline">
+                                {article.author && <span>Oleh {article.author}</span>}
+                                {article.author && article.date && <span> · </span>}
+                                {article.date && <span>{article.date}</span>}
+                            </div>
+                        )}
+                        <div className="news-article-text">
+                            {article.text.split(/\n+/).filter(Boolean).map((para, i) => (
+                                <p key={i}>{para}</p>
+                            ))}
+                        </div>
+                        <div className="news-article-attribution">
+                            Diambil otomatis dari {article.site || 'situs sumber'} — cek langsung ke
+                            sumbernya untuk tampilan asli, gambar, dan konteks lengkap.
+                        </div>
+                    </>
+                )}
+
+                {!articleLoading && !article && articleError && (
+                    <div className="news-article-status news-article-status-error">
+                        {articleError} Google News RSS sendiri hanya menyediakan judul dan sumber.
+                    </div>
+                )}
             </div>
 
             <a

@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from tradingview_screener import Query
 from services.indicators import compute_indicators, classify_candle, make_forecast
 from services.news import fetch_news
+from services.news_scraper import scrape_news_article
 from services.syariah import is_syariah
 from services.calibration import calibrator, auto_calibrate
 from screener_service import get_scalp_candidates
@@ -281,6 +282,31 @@ async def news():
         return cached
     result = await asyncio.to_thread(fetch_news)
     _cache_set("news", result)
+    return result
+
+
+@app.get("/api/news/article")
+async def news_article(url: str):
+    """On-demand full-article fetch for ONE Google News RSS item -- runs
+    only when a user opens a specific article in the News tab's detail
+    panel, never as part of the /api/news list. See
+    services/news_scraper.py's module docstring for why this exists and
+    what it deliberately does not do (no batch job, nothing persisted).
+
+    `url` must be one of the news.google.com redirect links /api/news
+    itself returned -- scrape_news_article() rejects anything else, so this
+    endpoint can't be repurposed into a general "fetch any URL" proxy.
+
+    Cached 1h: article content is static once published, and the same
+    article can reasonably be reopened in one session.
+    """
+    cache_key = f"article:{url}"
+    cached = _cache_get(cache_key, 3600)
+    if cached is not None:
+        return cached
+    result = await asyncio.to_thread(scrape_news_article, url)
+    if result["status"] == "success":
+        _cache_set(cache_key, result)
     return result
 
 
