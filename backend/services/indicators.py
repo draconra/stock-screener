@@ -2,7 +2,12 @@ from typing import Optional
 import pandas as pd
 
 # ─── Signal thresholds — single source of truth ─────────────────
-# Shared with screener_service so both use identical criteria.
+# Actually shared now: classify_candle() below, screener_service._signal(),
+# and simulate.detect_signal() all delegate to services.signal_engine
+# .classify_signal(), which imports these constants directly. Previously
+# each of those three had its own independent if/elif chain with its own
+# copy of these thresholds (and its own drift from this comment) — see the
+# plan doc for the measured specifics.
 STRONG_BUY_RSI = (30, 50)
 STRONG_BUY_VOL = 2.0
 
@@ -11,22 +16,34 @@ BUY_VOL = 1.5
 
 TREND_RSI = (45, 65)
 TREND_VOL = 1.3
+TREND_BB_MAX = 0.7
 
 SELL_BB  = 0.85
 SELL_RSI = 65
 SELL_VOL = 1.5
 
-# Scalp: uptrend continuation touch on EMA21 — RSI must be ABOVE midline (50+)
-# Simulation showed RSI 40-50 near EMA21 is a pullback, better caught by BUY signal.
-# Only RSI 50-68 guarantees price is still in confirmed uptrend momentum.
-# Modified: tighter SCALP RSI range based on historical simulation for improved Expectancy and R:R
+# SCALP: uptrend continuation with price hugging EMA21 (within
+# SCALP_EMA_PROXIMITY) at a neutral RSI. Evaluated BEFORE the broader BUY
+# bands in signal_engine.classify_signal() specifically because this
+# condition set is a strict subset of BUY_RSI's (45-55 ⊂ 30-55) and of
+# TREND_RSI's (45-55 ⊂ 45-65) — checked after them, it can never fire.
+# That was the actual bug (verified against screener_service.py before this
+# fix: SCALP was dead code in the live screener). This is an evaluation-order
+# fix, not a new threshold value.
 SCALP_RSI = (45, 55)
 SCALP_VOL = 1.5
+SCALP_EMA_PROXIMITY = 0.010   # within 1.0% of EMA21
 
-# Reversal: oversold bounce with volume confirmation
+# REVERSAL: downtrend oversold bounce with volume confirmation. Of the four
+# buy-type signals this is the one with the strongest IDX-specific support —
+# individual investors, who dominate IDX turnover, trade contrarian rather
+# than momentum (OJK Working Paper WP/18/04), and momentum itself is not a
+# significant IDX factor (Li, Wei & Zhang 2023, Pacific-Basin Finance
+# Journal 82). See the plan doc for full citations.
 REVERSAL_RSI = 35       # RSI must be below this
 REVERSAL_VOL = 2.0      # Volume spike = smart money
 REVERSAL_BB  = 0.20     # Near or below Bollinger lower band
+REVERSAL_STOCH = 20     # Stochastic %K threshold (alternative trigger to RSI)
 
 
 def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
@@ -77,43 +94,39 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+_MARKER_STYLE = {
+    'STRONG BUY': {'position': 'belowBar', 'color': '#00e676', 'shape': 'arrowUp'},
+    'BUY':        {'position': 'belowBar', 'color': '#2196F3', 'shape': 'arrowUp'},
+    'SCALP':      {'position': 'belowBar', 'color': '#00bcd4', 'shape': 'arrowUp'},
+    'REVERSAL':   {'position': 'belowBar', 'color': '#ff9800', 'shape': 'arrowUp'},
+    'SELL':       {'position': 'aboveBar', 'color': '#e91e63', 'shape': 'arrowDown'},
+}
+
+
 def classify_candle(row) -> Optional[dict]:
-    ema_up   = row['EMA9'] > row['EMA21']
-    rsi      = row['RSI']
-    vol      = row['Vol_ratio']
-    bb       = row['BB_pct']
-    pullback = row['consec_down']
+    """Chart marker for one OHLCV bar. Delegates to signal_engine
+    .classify_signal() — see that module for the actual classification
+    logic. This function's only remaining job is building the SignalInputs
+    dict from a compute_indicators() row and mapping the result to a
+    lightweight-charts marker."""
+    from .signal_engine import classify_signal, SignalInputs
 
-    if (ema_up and 2 <= pullback <= 3 and
-            STRONG_BUY_RSI[0] < rsi < STRONG_BUY_RSI[1] and
-            vol > STRONG_BUY_VOL and bb < 0.5):
-        return {'position': 'belowBar', 'color': '#00e676', 'shape': 'arrowUp', 'text': 'STRONG BUY'}
-
-    if ema_up and 1 <= pullback <= 3 and BUY_RSI[0] < rsi < BUY_RSI[1] and vol > BUY_VOL:
-        return {'position': 'belowBar', 'color': '#2196F3', 'shape': 'arrowUp', 'text': 'BUY'}
-
-    if (row['EMA9'] > row['EMA21'] > row['EMA50'] and
-            TREND_RSI[0] <= rsi <= TREND_RSI[1] and vol > TREND_VOL and bb < 0.7):
-        return {'position': 'belowBar', 'color': '#2196F3', 'shape': 'arrowUp', 'text': 'BUY'}
-
-    if bb > SELL_BB and rsi > SELL_RSI and vol > SELL_VOL:
-        return {'position': 'aboveBar', 'color': '#e91e63', 'shape': 'arrowDown', 'text': 'SELL'}
-
-    # REVERSAL BUY: oversold + volume spike + price near BB lower (downtrend bounce)
-    stoch = row.get('Stoch_K', 50) if 'Stoch_K' in row.index else 50
-    if (not ema_up and (rsi < REVERSAL_RSI or stoch < 20)
-            and bb < REVERSAL_BB and vol > REVERSAL_VOL):
-        return {'position': 'belowBar', 'color': '#ff9800', 'shape': 'arrowUp', 'text': 'REVERSAL BUY'}
-
-    # SCALP: uptrend continuation — price touching EMA21 from ABOVE with RSI 50-68
-    # Confirmed by simulation: RSI below 50 near EMA21 is better treated as BUY.
-    ema21 = row['EMA21']
-    close = row['Close']
-    near_ema = abs(close - ema21) / ema21 < 0.010  # within 1.0% of EMA21 (tighter based on simulation 4)
-    if (ema_up and near_ema and SCALP_RSI[0] <= rsi <= SCALP_RSI[1] and vol > SCALP_VOL):
-        return {'position': 'belowBar', 'color': '#00bcd4', 'shape': 'arrowUp', 'text': 'SCALP'}
-
-    return None
+    stoch = row.get('Stoch_K', 50) if 'Stoch_K' in row.index else None
+    ind: SignalInputs = {
+        'rsi': row['RSI'],
+        'vol_ratio': row['Vol_ratio'],
+        'bb_pct': row['BB_pct'],
+        'close': row['Close'],
+        'ema21': row['EMA21'],
+        'ema_up': row['EMA9'] > row['EMA21'],
+        'ema_stack': row['EMA9'] > row['EMA21'] > row['EMA50'],
+        'consec_down': int(row['consec_down']),
+        'stoch_k': stoch,
+    }
+    sig = classify_signal(ind)
+    if sig == 'WATCH':
+        return None
+    return {**_MARKER_STYLE[sig], 'text': sig}
 
 
 def make_forecast(row) -> dict:
