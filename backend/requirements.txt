@@ -6,6 +6,6 @@ numpy==2.0.2
 tradingview-screener==3.1.0
 feedparser==6.0.12
 zhipuai==2.1.5.20250825
-python-dotenv==1.2.1
+python-dotenv==1.2.3
 trafilatura==2.0.0
 googlenewsdecoder==0.1.7
