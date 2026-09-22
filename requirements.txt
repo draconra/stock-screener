@@ -1,9 +1,1 @@
-fastapi
-uvicorn[standard]
-yfinance
-pandas
-numpy
-tradingview-screener
-feedparser
-zhipuai
-python-dotenv
+-r backend/requirements.txt
