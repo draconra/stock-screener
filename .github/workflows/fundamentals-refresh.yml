@@ -1,0 +1,92 @@
+name: fundamentals-refresh
+
+# Two schedules, one workflow:
+#   - 1st of the month: full refresh, commits data/ on success.
+#   - 15th of the month: dry-run canary against the LIVE Yahoo endpoint, no
+#     commit. Exists so a breaking change (Yahoo rate-limit, a renamed
+#     .info field) surfaces two weeks before the data is actually needed,
+#     on a schedule you control instead of on the 1st.
+#
+# IMPORTANT: checkout uses DATA_PUSH_TOKEN (a fine-grained PAT), not the
+# default GITHUB_TOKEN. GitHub auto-disables a scheduled workflow after 60
+# days with no repository activity, and a push made with GITHUB_TOKEN does
+# NOT count as activity for that clock -- a push authored via a PAT does.
+# Skipping this is the single most likely way this pipeline goes silently
+# dark. See docs/fundamentals-runbook.md.
+
+on:
+  schedule:
+    - cron: "0 22 1 * *" # 1st of month, 05:00 WIB next day -- full refresh + commit
+    - cron: "0 22 15 * *" # 15th of month -- dry-run canary, no commit
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Validate only, do not commit"
+        type: boolean
+        default: false
+      limit:
+        description: "Fetch only the first N tickers (0 = full universe)"
+        type: number
+        default: 0
+
+concurrency:
+  group: fundamentals-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DATA_PUSH_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - run: pip install -r requirements.txt
+
+      - name: Determine mode
+        id: mode
+        run: |
+          if [ "${{ github.event.schedule }}" = "0 22 15 * *" ] || [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "dry_run=--dry-run" >> "$GITHUB_OUTPUT"
+          else
+            echo "dry_run=" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "${{ inputs.limit }}" ] && [ "${{ inputs.limit }}" != "0" ]; then
+            echo "limit=--limit ${{ inputs.limit }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "limit=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Refresh fundamentals
+        id: refresh
+        run: |
+          python -m fundamentals.cli refresh ${{ steps.mode.outputs.dry_run }} ${{ steps.mode.outputs.limit }}
+
+      - name: Upload rejected/staged snapshot on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fundamentals-staging-${{ github.run_id }}
+          path: data/_staging/
+          retention-days: 30
+
+      - name: Commit and push
+        if: success() && github.event.schedule == '0 22 1 * *'
+        run: |
+          git config user.name "fundamentals-bot"
+          git config user.email "sumardi.aditya@kitabisa.com"
+          git add data/
+          git diff --cached --quiet && echo "Nothing to commit" && exit 0
+          AS_OF=$(python -c "import json; print(json.load(open('data/_meta/latest.json'))['as_of'])")
+          git commit -m "data: fundamentals snapshot ${AS_OF}"
+          git push

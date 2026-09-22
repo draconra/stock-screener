@@ -1,8 +1,11 @@
 # Indonesian Stock Exchange (IDX) Screener & Trading Algorithm
 
-A Python and React-based stock screening and quantitative analysis tool specifically built for the Indonesian Stock Exchange (IDX). The tool scans the top liquid IDX stocks, detects high-probability trade setups based on technical momentum indicators, and dynamically calculates optimized buy and sell zones.
+A Python and React-based stock screening and quantitative analysis tool for the Indonesian Stock Exchange (IDX). It covers two deliberately separate horizons:
 
-The core algorithm is tuned to target a **2% - 3% net profit per trade** while safely absorbing standard IDX broker fees (0.15% Buy, 0.25% Sell, 0.04% Levy).
+* **Screener** — a 1-5 day scalper. Scans the top liquid IDX stocks, detects high-probability trade setups based on technical momentum indicators, and dynamically calculates optimized buy and sell zones. Tuned to target a **2% - 3% net profit per trade** while safely absorbing standard IDX broker fees (0.15% Buy, 0.25% Sell, 0.04% Levy).
+* **Investasi** — a long-term fundamental screener. Scores every liquid IDX company on valuation, profitability, growth, balance-sheet health, and dividends, refreshed monthly from a committed data snapshot (not live). See [`docs/fundamentals-runbook.md`](docs/fundamentals-runbook.md) for how the pipeline works and how to operate it.
+
+These two tabs intentionally do not share scoring logic, caching strategy, or UI vocabulary — see `backend/fundamentals/` for why.
 
 ---
 
@@ -14,6 +17,7 @@ The core algorithm is tuned to target a **2% - 3% net profit per trade** while s
 *   **AI-Powered Optimization:** Integrates with ZhipuAI (GLM-4) to periodically analyze a 6-month historical backtest and dynamically adjust the trading multipliers based on shifting market conditions.
 *   **Syariah Compliance Filter:** Automatically tags stocks that are compliant with the Daftar Efek Syariah (DES).
 *   **Built-in Backtester:** Includes a robust simulation engine (`simulate.py`) to test configurations against historical data, calculating Win Rate, Expectancy, Risk/Reward, and Max Drawdown.
+*   **Fundamental Screener ("Investasi" tab):** Long-term valuation/profitability/growth/health/dividend scoring across the liquid IDX universe, with sector-aware handling (banks are never penalized for lacking a Debt/Equity ratio) and full per-criterion explainability. Data is refreshed monthly offline (GitHub Actions) and served from a committed snapshot — see `backend/fundamentals/`.
 
 ---
 
@@ -52,17 +56,32 @@ stock-screener/
 │
 ├── backend/                  # Python FastAPI Server
 │   ├── api.py                # Main server entrypoint and REST endpoints
-│   ├── screener_service.py   # TradingView scanner logic 
-│   ├── simulate.py           # Historical backtesting engine
-│   ├── requirements.txt      # Python dependencies
+│   ├── screener_service.py   # TradingView scanner logic (scalper)
+│   ├── simulate.py           # Historical backtesting engine (scalper)
+│   ├── requirements.txt      # Python dependencies (pinned)
+│   ├── requirements-dev.txt  # + pytest, for running fundamentals/tests/
+│   ├── pytest.ini
 │   ├── .env                  # Environment variables (GLM_API_KEY)
-│   └── services/             # Core business logic
-│       ├── indicators.py     # Technical indicator math (RSI, ATR, EMAs, etc.)
-│       ├── calibration.py    # Dynamic targets and AI integration
-│       ├── news.py           # Financial news fetcher
-│       └── syariah.py        # Syariah compliance checker
+│   ├── services/             # Scalper business logic
+│   │   ├── indicators.py     # Technical indicator math (RSI, ATR, EMAs, etc.)
+│   │   ├── calibration.py    # Dynamic targets and AI integration
+│   │   ├── news.py           # Financial news fetcher
+│   │   └── syariah.py        # Syariah compliance checker (shared with Investasi tab)
+│   └── fundamentals/         # Long-term screener: schema, scoring, data pipeline
+│       ├── cli.py            # `python -m fundamentals.cli refresh` -- see docs/fundamentals-runbook.md
+│       ├── providers/        # yfinance_provider.py is the ONLY module allowed to import yfinance
+│       ├── score.py          # gates + 5-pillar scoring engine
+│       ├── store.py          # stdlib-only serverless read path
+│       └── tests/            # 74 offline tests, fixture-based
 │
-└── frontend/                 # React UI (Placeholder)
+├── data/                      # Committed fundamentals snapshots (see fundamentals/writer.py)
+├── docs/
+│   └── fundamentals-runbook.md
+│
+└── frontend/                  # React UI
+    └── src/components/
+        ├── ScreenerTab.tsx, StockCard.tsx, ...      # scalper
+        └── InvestTab.tsx, FundamentalCard.tsx, ...  # long-term screener
 ```
 
 ---
@@ -99,3 +118,21 @@ To verify the current configuration against historical data, run the simulator f
 python simulate.py
 ```
 This will output a detailed comparison table showing the Win Rate, Expectancy, and Sharpe Ratio of various configurations.
+
+### Fundamental Screener ("Investasi" tab)
+
+This tab reads from a pre-computed snapshot under `data/` — it does **not** hit
+yfinance at request time. To generate or refresh that snapshot locally:
+
+```bash
+cd backend
+pip install -r requirements-dev.txt   # adds pytest on top of requirements.txt
+python -m pytest fundamentals/tests/ -v   # 74 tests, offline, ~1s
+python -m fundamentals.cli refresh --dry-run --limit 20   # smoke test, writes nothing
+python -m fundamentals.cli refresh                        # full run, ~8-10 min, writes data/
+```
+
+In production this runs monthly via `.github/workflows/fundamentals-refresh.yml`.
+Full details, including what each data-quality threshold catches and how to
+recover from a stalled pipeline, are in
+[`docs/fundamentals-runbook.md`](docs/fundamentals-runbook.md).
