@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,MAIN,Consumer Defensive,665.0,1483280875520,3.197,0.5178,208.01,0.1734,0.06861,87.621,7.82,0.25
+2026-09-22,MAIN,Consumer Defensive,670.0,1494433398784,3.221,0.5217,208.01,0.1734,0.06861,87.621,7.82,0.25

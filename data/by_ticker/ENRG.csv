@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,ENRG,Energy,1225.0,43126890692608,20.8404,34027.777,58.78,0.1279,0.06595,56.576,,0.0
+2026-09-22,ENRG,Energy,1230.0,43302917242880,20.9255,34166.668,58.78,0.1279,0.06595,56.576,,0.0

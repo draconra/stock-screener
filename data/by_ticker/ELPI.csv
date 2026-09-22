@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,ELPI,Industrials,585.0,5571785261056,38.8446,1.7063,15.06,0.05021,0.02403,16.199,2.35,0.9429
+2026-09-22,ELPI,Industrials,580.0,5522965659648,38.5126,1.6917,15.06,0.05021,0.02403,16.199,2.35,0.9429

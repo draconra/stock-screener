@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,AADI,Energy,11225.0,87407860908032,6.109,26226.635,1837.44,0.23297,0.1111,25.672,8.63,0.5636
+2026-09-22,AADI,Energy,11250.0,87602535333888,6.1226,26285.047,1837.44,0.23297,0.1111,25.672,8.63,0.5636

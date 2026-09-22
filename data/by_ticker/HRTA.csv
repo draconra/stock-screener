@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,HRTA,Consumer Cyclical,2110.0,9717103460352,7.3053,2.6011,288.83,0.41947,0.13979,111.814,1.88,0.1385
+2026-09-22,HRTA,Consumer Cyclical,2120.0,9763155869696,7.3392,2.6134,288.86,0.41947,0.13979,111.814,1.88,0.1385

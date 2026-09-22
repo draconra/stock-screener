@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,INDY,Energy,2630.0,13683080036352,52.9282,11385.281,49.69,0.03069,0.03252,94.428,0.38,0.205
+2026-09-22,INDY,Energy,2610.0,13579026694144,52.5257,11298.701,49.69,0.03069,0.03252,94.428,0.38,0.205

@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,SHIP,Energy,2630.0,7153047830528,25.5117,46964.285,103.09,0.07507,0.04628,154.332,1.29,0.3379
+2026-09-22,SHIP,Energy,2640.0,7180245794816,25.6087,47142.855,103.09,0.07507,0.04628,154.332,1.29,0.3379

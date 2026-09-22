@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,PSAB,Basic Materials,520.0,13759200362496,3.9547,32499.998,131.49,0.48457,-0.00596,15.292,5.56,0.7909
+2026-09-22,PSAB,Basic Materials,525.0,13891500244992,3.9927,32812.5,131.49,0.48457,-0.00596,15.292,5.56,0.7909

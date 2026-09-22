@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,PTBA,Energy,3020.0,34773359656960,7.3283,1.3785,412.1,0.21109,0.06779,11.782,3.72,0.2779
+2026-09-22,PTBA,Energy,3030.0,35003643723776,7.3769,1.3876,412.1,0.21109,0.06779,11.782,3.72,0.2779

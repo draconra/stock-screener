@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,SMDR,Industrials,400.0,6550239838208,7.3341,12121.212,54.54,0.10326,0.04156,67.026,2.97,0.2273
+2026-09-22,SMDR,Industrials,400.0,6550239838208,7.3341,11764.705,54.54,0.10326,0.04156,67.026,2.97,0.2273

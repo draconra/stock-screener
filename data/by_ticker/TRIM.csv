@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,TRIM,Financial Services,825.0,5865172631552,8.1425,2.5071,101.32,0.36033,0.1095,144.178,0.12,0.0099
+2026-09-22,TRIM,Financial Services,830.0,5900719357952,8.1919,2.5223,101.32,0.36033,0.1095,144.178,0.12,0.0099

@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,CTBN,Energy,3060.0,2449136943104,34.475,23906.248,88.76,0.04392,0.02585,2.279,15.25,5.1842
+2026-09-22,CTBN,Energy,3010.0,2409118302208,34.1463,23515.623,88.15,0.04392,0.02585,2.279,15.25,5.1842

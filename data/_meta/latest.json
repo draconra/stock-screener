@@ -1,0 +1,10 @@
+{
+  "as_of": "2026-09-22",
+  "coverage": 0.9142,
+  "file": "snapshots/2026-09-22.csv",
+  "provider": "yfinance",
+  "provider_version": "0.2.65",
+  "rows": 437,
+  "schema_version": 1,
+  "universe_size": 478
+}

@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,AUTO,Consumer Cyclical,3360.0,16194303164416,6.705,1.0127,501.12,0.15295,0.03424,3.433,6.8,0.4571
+2026-09-22,AUTO,Consumer Cyclical,3370.0,16242499911680,6.7249,1.0157,501.12,0.15295,0.03424,3.433,6.8,0.4571

@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,MSTI,Technology,1345.0,4222514888704,7.5706,1.9464,177.66,0.26807,0.14062,4.606,17.78,0.6867
+2026-09-22,MSTI,Technology,1350.0,4238212071424,7.6005,1.9537,177.62,0.26807,0.14062,4.606,17.78,0.6867

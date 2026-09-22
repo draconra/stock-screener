@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,TKIM,Basic Materials,7400.0,23037854351360,2.947,7177.4976,2511.0,0.14711,0.01003,23.331,0.4,0.0118
+2026-09-22,TKIM,Basic Materials,7375.0,22960024846336,2.9371,7153.249,2511.0,0.14711,0.01003,23.331,0.4,0.0118

@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,PGEO,Utilities,1065.0,44644066918400,17.1746,22187.5,62.01,0.07514,0.04349,36.958,4.69,0.8137
+2026-09-22,PGEO,Utilities,1070.0,44853664677888,17.2553,22291.666,62.01,0.07514,0.04349,36.958,4.69,0.8137

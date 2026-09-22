@@ -1,0 +1,31 @@
+{
+  "net_income": {
+    "Net Income": 428,
+    "__MISS__": 9
+  },
+  "ocf": {
+    "Cash Flowsfromusedin Operating Activities Direct": 427,
+    "Operating Cash Flow": 1,
+    "__MISS__": 9
+  },
+  "revenue": {
+    "Total Revenue": 428,
+    "__MISS__": 9
+  },
+  "shares_outstanding": {
+    "Ordinary Shares Number": 428,
+    "__MISS__": 9
+  },
+  "total_assets": {
+    "Total Assets": 428,
+    "__MISS__": 9
+  },
+  "total_debt": {
+    "Total Debt": 425,
+    "__MISS__": 12
+  },
+  "total_equity": {
+    "Stockholders Equity": 428,
+    "__MISS__": 9
+  }
+}

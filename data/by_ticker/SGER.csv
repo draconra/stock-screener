@@ -1,0 +1,3 @@
+as_of,ticker,sector,price,market_cap,pe_trailing,pbv,eps_ttm,roe,roa,debt_to_equity,dividend_yield,payout_ratio
+2026-09-22,SGER,Energy,715.0,11144640069632,48.2131,4.5544,14.83,0.09139,0.04374,95.007,10.76,0.0
+2026-09-22,SGER,Energy,720.0,11222574432256,49.9307,4.5863,14.42,0.09139,0.04374,95.007,10.76,0.0
